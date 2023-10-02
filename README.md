@@ -1,1 +1,1 @@
-# comic-book-corner
+# Comic Book Corner
