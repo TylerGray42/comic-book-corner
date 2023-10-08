@@ -1,6 +1,7 @@
 import sqlite3
 from sqlite3 import Error
 
+
 class SQLDB:
 
     def __init__(self, path):
@@ -14,10 +15,8 @@ class SQLDB:
         except Error as e:
             print(f"The error {e}")
 
-
     def __del__(self):
         self.connection.close()
-
 
     def execute_query(self, query: str) -> None:
         try:
@@ -26,6 +25,12 @@ class SQLDB:
         except Error as e:
             print(f"The error {e} occurred")
 
+    def executemany_query(self, query: str, value: list[tuple]) -> None:
+        try:
+            self.cursor.executemany(query, value)
+            self.connection.commit()
+        except Error as e:
+            print(f"The error {e} occurred")
 
     def execute_read_query(self, query: str) -> list:
         result = None
@@ -37,11 +42,9 @@ class SQLDB:
             print(f"The error {e} occurred")
 
 
-
 def create_database():
 
     sql_db = SQLDB("database.sqlite")
-
 
     sql_db.execute_query("DROP TABLE IF EXISTS orders_comic;")
     sql_db.execute_query("DROP TABLE IF EXISTS orders;")
@@ -51,8 +54,7 @@ def create_database():
     sql_db.execute_query("DROP TABLE IF EXISTS comic;")
     sql_db.execute_query("DROP TABLE IF EXISTS publishers;")
     sql_db.execute_query("DROP TABLE IF EXISTS authors;")
-    
-    
+
     users_table = """
     CREATE TABLE users (
         login TEXT NOT NULL UNIQUE,
@@ -128,7 +130,6 @@ def create_database():
         FOREIGN KEY (orderId) REFERENCES orders (id) ON DELETE CASCADE
     );
     """
-
 
     sql_db.execute_query(users_table)
     sql_db.execute_query(authors_table)
