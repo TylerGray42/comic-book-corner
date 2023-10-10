@@ -4,39 +4,51 @@ from sqlite3 import Error
 
 class SQLDB:
 
-    def __init__(self, path):
-        self.connection = None
+    def __init__(self, path: str):
+        self.__path = path
 
         try:
-            self.connection = sqlite3.connect(path)
-            self.cursor = self.connection.cursor()
-            self.cursor.execute("PRAGMA foreign_keys = ON;")
-            self.connection.commit()
+            connection = sqlite3.connect(self.__path)
+            cursor = connection.cursor()
+            cursor.execute("PRAGMA foreign_keys = ON;")
+            connection.commit()
+            connection.close()
         except Error as e:
             print(f"The error {e}")
 
-    def __del__(self):
-        self.connection.close()
 
     def execute_query(self, query: str) -> None:
         try:
-            self.cursor.execute(query)
-            self.connection.commit()
+            connection = sqlite3.connect(self.__path)
+            cursor = connection.cursor()
+            cursor.execute(query)
+            connection.commit()
+            cursor.close()
+            connection.close()
         except Error as e:
             print(f"The error {e} occurred")
 
     def executemany_query(self, query: str, value: list[tuple]) -> None:
         try:
-            self.cursor.executemany(query, value)
-            self.connection.commit()
+            connection = sqlite3.connect(self.__path)
+            cursor = connection.cursor()
+            cursor.executemany(query, value)
+            connection.commit()
+            cursor.close()
+            connection.close()
         except Error as e:
             print(f"The error {e} occurred")
 
     def execute_read_query(self, query: str) -> list:
         result = None
         try:
-            self.cursor.execute(query)
-            result = self.cursor.fetchall()
+            
+            connection = sqlite3.connect(self.__path)
+            cursor = connection.cursor()
+            cursor.execute(query)
+            result = cursor.fetchall()
+            cursor.close()
+            connection.close()
             return result
         except Error as e:
             print(f"The error {e} occurred")

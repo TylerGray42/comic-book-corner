@@ -1,14 +1,13 @@
 from flask import Flask, render_template, redirect, url_for
-from flask_sqlalchemy import SQLAlchemy
 from forms import LoginForm, RegisterForm
+from database import SQLDB
 
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'c9a1e7e34db4eea5c3948a949e4d71208b1460ed01322605'
 app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///database.sqlite"
 
-db = SQLAlchemy(app)
-
+database = SQLDB("database.sqlite")
 
 @app.route('/')
 def index():
@@ -22,7 +21,7 @@ def login():
     if form.validate_on_submit():
         user_login = form.user_login.data
         # if user_login == 'admin' and form.user_password.data == '<PASSWORD>':
-        #     return render_template('admin.html')
+        #     return redirect('admin.html')
         if user_login:
             return redirect(url_for('user', user_login=user_login))
         form.user_login.data = ""
