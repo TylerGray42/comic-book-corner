@@ -12,6 +12,11 @@
     {{form.user_login(class="form-control")}}
     {{form.user_password.label(class="form-label")}}
     {{form.user_password(class="form-control")}}
+    {{form.user_cpassword.label(class="form-label")}}
+    {{form.user_cpassword(class="form-control")}}
+    {% for error in form.user_cpassword.errors %} 
+    {{ error }}
+    {% endfor%}
     <br />
     {{form.submit(class="btn btn-secondary")}}
 </form>
