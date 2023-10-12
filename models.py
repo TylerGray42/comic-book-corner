@@ -14,7 +14,7 @@ class User(UserMixin, db.Model):
     order = db.relationship("Order", backref="user", lazy=True)
 
     def __repr__(self):
-        return '<User %r>' % self.username
+        return '<User %r>' % self.id
 
 
 class Order(db.Model):
@@ -25,6 +25,9 @@ class Order(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)
 
     order_comic = db.relationship("Order_comic", backref="order", lazy=True)
+
+    def __repr__(self):
+        return '<Order %r>' % self.id
 
 
 class Publisher(db.Model):
@@ -37,6 +40,9 @@ class Publisher(db.Model):
 
     comic = db.relationship("Comic", backref="publicher", lazy=True)
 
+    def __repr__(self):
+        return '<Publisher %r>' % self.id
+
 
 class Author(db.Model):
     __tablename__ = "author"
@@ -47,6 +53,9 @@ class Author(db.Model):
     image = db.Column(db.LargeBinary, unique=False, nullable=True)
 
     comic = db.relationship("Comic", backref="author", lazy=True)
+
+    def __repr__(self):
+        return '<Author %r>' % self.id
 
 
 class Comic(db.Model):
@@ -60,7 +69,11 @@ class Comic(db.Model):
     publisher_id = db.Column(db.Integer, db.ForeignKey("publisher.id"), nullable=False)
     author_id = db.Column(db.Integer, db.ForeignKey("author.id"), nullable=False)
 
+    order_comic = db.relationship("Order_comic", backref="comic", lazy=True)
     genre_comic = db.relationship("Genre_comic", backref="comic", lazy=True)
+
+    def __repr__(self):
+        return '<Comic %r>' % self.id
 
 
 class Order_comic(db.Model):
@@ -71,13 +84,20 @@ class Order_comic(db.Model):
     order_id = db.Column(db.Integer, db.ForeignKey("order.id"), nullable=False)
     comic_id = db.Column(db.Integer, db.ForeignKey("comic.id"), nullable=False)
 
+    def __repr__(self):
+        return '<Order_comic %r>' % self.id
+
 
 class Genre(db.Model):
     __tablename__ = "genre"
 
-    genre = db.Column(db.Text, primary_key=True)
+    id = db.Column(db.Integer, primary_key=True)
+    title = db.Column(db.Text, unique=True, nullable=False)
 
     genre_comic = db.relationship("Genre_comic", backref="genre", lazy=True)
+
+    def __repr__(self):
+        return '<Genre %r>' % self.genre
 
 
 class Genre_comic(db.Model):
@@ -85,5 +105,8 @@ class Genre_comic(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     comic_id = db.Column(db.Integer, db.ForeignKey("comic.id"), nullable=False)
-    genre = db.Column(db.Text, db.ForeignKey("genre.genre"), nullable=False)
+    genre_id = db.Column(db.Integer, db.ForeignKey("genre.id"), nullable=False)
+
+    def __repr__(self):
+        return '<Genre_comic %r>' % self.id
 

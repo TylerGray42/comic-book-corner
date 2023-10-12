@@ -1,6 +1,6 @@
 from forms import RegisterForm, LoginForm
 from app import login_manager, create_app, db, bcrypt
-from forms import User
+from models import User, Order, Publisher, Author, Comic, Order_comic, Genre, Genre_comic
 from flask import render_template, flash, url_for, redirect
 from flask_bcrypt import check_password_hash
 from flask_login import login_user, logout_user, login_required, current_user
@@ -16,7 +16,9 @@ app = create_app()
 
 @app.route("/", methods=("GET", "POST"), strict_slashes=False)
 def index():
-    print(current_user.login)
+    if current_user.is_authenticated:
+        print(current_user)
+    print(current_user)
     return render_template("index.html", title="Home")
 
 
@@ -72,3 +74,8 @@ def register():
 def logout():
     logout_user()
     return redirect(url_for('login'))
+
+
+# @app.route("/user")
+# def user():
+#     return render_template("user.html")
