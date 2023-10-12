@@ -11,5 +11,79 @@ class User(UserMixin, db.Model):
     admin = db.Column(db.Integer, unique=False, nullable=False, default=0)
     image = db.Column(db.LargeBinary, unique=False, nullable=True)
 
+    order = db.relationship("Order", backref="user", lazy=True)
+
     def __repr__(self):
         return '<User %r>' % self.username
+
+
+class Order(db.Model):
+    __tablename__ = "order"
+
+    id = db.Column(db.Integer, primary_key=True)
+    time = db.Column(db.Text, unique=False, nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)
+
+    order_comic = db.relationship("Order_comic", backref="order", lazy=True)
+
+
+class Publisher(db.Model):
+    __tablename__ = "publisher"
+
+    id = db.Column(db.Integer, primary_key=True)
+    title = db.Column(db.Text, unique=False, nullable=False)
+    contact = db.Column(db.Text, nullable=True)
+    image = db.Column(db.LargeBinary, unique=False, nullable=True)
+
+    comic = db.relationship("Comic", backref="publicher", lazy=True)
+
+
+class Author(db.Model):
+    __tablename__ = "author"
+
+    id = db.Column(db.Integer, primary_key=True)
+    fio = db.Column(db.Text, unique=False, nullable=False)
+    bio = db.Column(db.Text, unique=False, nullable=True)
+    image = db.Column(db.LargeBinary, unique=False, nullable=True)
+
+    comic = db.relationship("Comic", backref="author", lazy=True)
+
+
+class Comic(db.Model):
+    __tablename__ = "comic"
+
+    id = db.Column(db.Integer, primary_key=True)
+    title = db.Column(db.Text, unique=False, nullable=False)
+    description = db.Column(db.Text, unique=False, nullable=True)
+    year = db.Column(db.Integer, unique=False, nullable=True)
+    image = db.Column(db.LargeBinary, unique=False, nullable=True)
+    publisher_id = db.Column(db.Integer, db.ForeignKey("publisher.id"), nullable=False)
+    author_id = db.Column(db.Integer, db.ForeignKey("author.id"), nullable=False)
+
+    genre_comic = db.relationship("Genre_comic", backref="comic", lazy=True)
+
+
+class Order_comic(db.Model):
+    __tablename__ = "order_comic"
+
+    id = db.Column(db.Integer, primary_key=True)
+    count = db.Column(db.Integer, unique=False, nullable=False, default=1)
+    order_id = db.Column(db.Integer, db.ForeignKey("order.id"), nullable=False)
+    comic_id = db.Column(db.Integer, db.ForeignKey("comic.id"), nullable=False)
+
+
+class Genre(db.Model):
+    __tablename__ = "genre"
+
+    genre = db.Column(db.Text, primary_key=True)
+
+    genre_comic = db.relationship("Genre_comic", backref="genre", lazy=True)
+
+
+class Genre_comic(db.Model):
+    __tablename__ = "genre_comic"
+
+    id = db.Column(db.Integer, primary_key=True)
+    comic_id = db.Column(db.Integer, db.ForeignKey("comic.id"), nullable=False)
+    genre = db.Column(db.Text, db.ForeignKey("genre.genre"), nullable=False)
+
