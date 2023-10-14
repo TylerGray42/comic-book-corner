@@ -21,8 +21,17 @@
                         Аккаунт
                     </a>
                     <ul class="dropdown-menu">
+                        {% if user.is_authenticated %}
+                        {% if user.admin == 1 %}
+                        <li><a class="dropdown-item" href="{{ url_for('admin') }}">Админ</a></li>
+                        {% else %}
+                        <li><a class="dropdown-item" href="{{ url_for('profile', id=user.id) }}">Профиль</a></li>
+                        {% endif %}
+                        <li><a class="dropdown-item" href="{{ url_for('logout') }}">Выход</a></li>
+                        {% else %}
                         <li><a class="dropdown-item" href="{{ url_for('login') }}">Вход</a></li>
                         <li><a class="dropdown-item" href="{{ url_for('register') }}">Регистрация</a></li>
+                        {% endif %}
                     </ul>
                 </li>
             </ul>

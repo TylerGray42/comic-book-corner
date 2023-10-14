@@ -16,10 +16,7 @@ app = create_app()
 
 @app.route("/", methods=("GET", "POST"), strict_slashes=False)
 def index():
-    if current_user.is_authenticated:
-        print(current_user)
-    print(current_user)
-    return render_template("index.html", title="Home")
+    return render_template("index.html", title="Home", user=current_user)
 
 
 # Login route
@@ -38,7 +35,7 @@ def login():
         except Exception as e:
             flash(e, "danger")
 
-    return render_template("login.html", form=form)
+    return render_template("login.html", form=form, user=current_user)
 
 
 # Register route
@@ -66,7 +63,7 @@ def register():
         except Exception as e:
             flash(e, "danger")
 
-    return render_template("register.html", form=form)
+    return render_template("register.html", form=form, user=current_user)
 
 
 @app.route("/logout")
@@ -76,6 +73,25 @@ def logout():
     return redirect(url_for('login'))
 
 
-# @app.route("/user")
-# def user():
-#     return render_template("user.html")
+@app.route("/profile/<id>",  methods=("GET", "POST"))
+def profile(id):
+    if not current_user.is_authenticated:
+        return redirect(url_for('login'))
+    return render_template("profile.html", user=current_user)
+
+
+@app.route("/admin/",  methods=("GET", "POST"))
+def admin():
+    if not current_user.is_authenticated or current_user.admin != 1:
+        return redirect(url_for('login'))
+    return render_template("admin.html", user=current_user)
+
+
+@app.errorhandler(404)
+def page_not_found(e):
+    return render_template("404.html", user=current_user), 404
+
+
+@app.errorhandler(500)
+def internal_server_error(e):
+    return render_template("500.html", user=current_user), 500
