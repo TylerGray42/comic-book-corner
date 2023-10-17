@@ -1,4 +1,4 @@
-from forms import RegisterForm, LoginForm
+from forms import RegisterForm, LoginForm, PublisherForm, AuthorForm
 from app import login_manager, create_app, db, bcrypt
 from models import User, Order, Publisher, Author, Comic, Order_comic, Genre, Genre_comic
 from flask import render_template, flash, url_for, redirect
@@ -83,8 +83,69 @@ def profile(id):
 @app.route("/admin/",  methods=("GET", "POST"))
 def admin():
     if not current_user.is_authenticated or current_user.admin != 1:
-        return redirect(url_for('login'))
+        return redirect(url_for('profile'))
     return render_template("admin.html", user=current_user)
+
+
+@app.route("/add_author", methods=("GET", "POST"))
+def add_author():
+    if not current_user.is_authenticated or current_user.admin != 1:
+        return redirect(url_for('profile'))
+    
+    form = AuthorForm()
+
+    if form.validate_on_submit():
+        try:
+            fio = form.fio.data
+            bio = form.bio.data
+            image = form.image.data
+
+            newauthor = Author(
+                fio = fio,
+                bio = bio,
+                image = image.read(),
+            )
+
+            db.session.add(newauthor)
+            db.session.commit()
+            flash(f"Автор добавлен", "success")
+            return redirect(url_for(admin.__name__))
+
+        except Exception as e:
+            flash(e, "danger")
+
+
+    return render_template("add_author.html", form=form, user=current_user)
+
+
+@app.route("/add_publisher", methods=("GET", "POST"))
+def add_publisher():
+    if not current_user.is_authenticated or current_user.admin != 1:
+        return redirect(url_for('profile'))
+    
+    form = PublisherForm()
+
+    if form.validate_on_submit():
+        try:
+            title = form.title.data
+            contact = form.contact.data
+            image = form.image.data
+
+            newpublisher = Publisher(
+                title = title,
+                contact = contact,
+                image = image.read(),
+            )
+
+            db.session.add(newpublisher)
+            db.session.commit()
+            flash(f"Издательство добавлено", "success")
+            return redirect(url_for(admin.__name__))
+
+        except Exception as e:
+            flash(e, "danger")
+
+    return render_template("add_publisher.html", form=form, user=current_user)
 
 
 @app.errorhandler(404)

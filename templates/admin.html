@@ -2,7 +2,13 @@
 
 {% block content %}
 
-<h1>Вы админ!</h1>
+</br>
+<div class="d-grid gap-2 col-6 mx-auto">
+    <a type="button" class="btn btn-secondary">Добавить комикс</a></br>
+    <a type="button" class="btn btn-secondary" href="{{ url_for('add_author') }}">Добавить автора</a></br>
+    <a type="button" class="btn btn-secondary" href="{{ url_for('add_publisher') }}">Добавить издателя</a></br>
+    <a type="button" class="btn btn-secondary">Добавить жанр</a></br>
+</div>
 
 
 {% endblock %}
