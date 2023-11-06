@@ -1,9 +1,10 @@
-from forms import RegisterForm, LoginForm, PublisherForm, AuthorForm
+from forms import RegisterForm, LoginForm, PublisherForm, AuthorForm, GenreForm, ComicForm
 from app import login_manager, create_app, db, bcrypt
 from models import User, Order, Publisher, Author, Comic, Order_comic, Genre, Genre_comic
 from flask import render_template, flash, url_for, redirect
 from flask_bcrypt import check_password_hash
 from flask_login import login_user, logout_user, login_required, current_user
+from PIL import Image
 
 
 @login_manager.user_loader
@@ -103,11 +104,20 @@ def add_author():
             newauthor = Author(
                 fio = fio,
                 bio = bio,
-                image = image.read(),
+                image = None,
             )
 
             db.session.add(newauthor)
             db.session.commit()
+
+            if image:
+                image_name = f"{Author.query.filter_by(fio=fio).first().id}"
+                image = Image.open(image)
+                image.save(f"static/images/author/{image_name}.{image.format}", format=image.format)
+
+                newauthor.image = f"{image_name}.{image.format}"
+            db.session.commit()
+
             flash(f"Автор добавлен", "success")
             return redirect(url_for(admin.__name__))
 
@@ -134,11 +144,20 @@ def add_publisher():
             newpublisher = Publisher(
                 title = title,
                 contact = contact,
-                image = image.read(),
+                image = None,
             )
 
             db.session.add(newpublisher)
             db.session.commit()
+
+            if image:
+                image_name = f"{Publisher.query.filter_by(title=title).first().id}"
+                image = Image.open(image)
+                image.save(f"static/images/publisher/{image_name}.{image.format}", format=image.format)
+
+                newpublisher.image = f"{image_name}.{image.format}"
+            db.session.commit()
+
             flash(f"Издательство добавлено", "success")
             return redirect(url_for(admin.__name__))
 
@@ -146,6 +165,92 @@ def add_publisher():
             flash(e, "danger")
 
     return render_template("add_publisher.html", form=form, user=current_user)
+
+
+@app.route("/add_genre", methods=["POST", "GET"])
+def add_genre():
+    if not current_user.is_authenticated or current_user.admin != 1:
+        return redirect(url_for('profile'))
+    
+    form = GenreForm()
+
+    if form.validate_on_submit():
+        try:
+            title = form.title.data
+
+            newgenre = Genre(
+                title = title,
+            )
+
+            db.session.add(newgenre)
+            db.session.commit()
+            flash(f"Жанр добавлен", "success")
+            return redirect(url_for(admin.__name__))
+
+        except Exception as e:
+            flash(e, "danger")
+
+    return render_template("add_genre.html", form=form, user=current_user)
+
+
+@app.route("/add_comic", methods=["POST", "GET"])
+def add_comic():
+    if not current_user.is_authenticated or current_user.admin != 1:
+        return redirect(url_for('profile'))
+    
+    form = ComicForm()
+
+    # Сортировать жанры
+    form.genres.choices = [(item.id, item.title) for item in Genre.query.all()]
+    form.publisher.choices = [(item.id, item.title) for item in Publisher.query.all()]
+    form.author.choices = [(item.id, item.fio) for item in Author.query.all()]
+
+    if form.validate_on_submit():
+        try:
+
+            title = form.title.data
+            description = form.description.data
+            year = form.year.data
+            genres = form.genres.data
+            publisher = form.publisher.data
+            author = form.author.data
+            image = form.image.data
+
+            newcomic = Comic(
+                title = title,
+                description = description,
+                year = str(year),
+                image = None,
+                publisher_id = publisher,
+                author_id = author,
+            )
+
+            db.session.add(newcomic)
+            db.session.commit()
+            comic_id = Comic.query.filter_by(title=title, description=description).first().id
+
+            if image:
+                image = Image.open(image)
+                image.save(f"static/images/comic/{comic_id}.{image.format}", format=image.format)
+
+                newcomic.image = f"{comic_id}.{image.format}"
+
+            for i in genres:
+                newgenre_comic = Genre_comic(
+                    comic_id = comic_id,
+                    genre_id = i,
+                )
+                db.session.add(newgenre_comic)
+
+            db.session.commit()
+
+            flash(f"Комикс добавлен", "success")
+            return redirect(url_for(admin.__name__))
+
+        except Exception as e:
+            flash(e, "danger")
+
+    return render_template("add_comic.html", form=form, user=current_user)
 
 
 @app.errorhandler(404)

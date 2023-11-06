@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<br />
+<form method="POST" enctype="multipart/form-data">
+    {{form.hidden_tag()}}
+
+    {{form.title.label(class="form-label")}}
+    {{form.title(class="form-control")}}
+    {{form.description.label(class="form-label")}}
+    {{form.description(class="form-control")}}
+    {{form.year.label(class="form-label")}}
+    {{form.year(class="form-control")}}
+    {{form.genres.label(class="form-label")}}
+    <p>Удерживайте Ctrl</p>
+    {{form.genres(class="form-control")}}
+    {{form.publisher.label(class="form-label")}}
+    {{form.publisher(class="form-control")}}
+    {{form.author.label(class="form-label")}}
+    {{form.author(class="form-control")}}
+    {{form.image.label(class="form-label")}}
+    {{form.image(class="form-control")}}
+    <br />
+    {{form.submit(class="btn btn-secondary")}}
+</form>
+</form>
+
+{% endblock %}

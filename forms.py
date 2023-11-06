@@ -1,8 +1,9 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, PasswordField, SubmitField
+from wtforms import StringField, PasswordField, SubmitField, DateField, SelectField, SelectMultipleField
 from wtforms.validators import DataRequired, EqualTo, ValidationError
 from flask_wtf.file import FileField, FileRequired, FileAllowed
 from models import User
+from datetime import datetime
 
 
 class LoginForm(FlaskForm):
@@ -26,12 +27,28 @@ class RegisterForm(FlaskForm):
 class PublisherForm(FlaskForm):
     title = StringField("Название", validators=[DataRequired()])
     contact = StringField("Контакты", validators=[DataRequired()])
-    image = FileField(validators=[FileRequired(), FileAllowed(['jpg', 'png'], 'Images only!')])
+    image = FileField("Фотография", validators=[FileAllowed(['jpg', 'png'], 'Images only!')])
     submit = SubmitField("Добавить")
 
 
 class AuthorForm(FlaskForm):
     fio = StringField("ФИО", validators=[DataRequired()])
     bio = StringField("Биография", validators=[DataRequired()])
-    image = FileField("Фотография", validators=[FileRequired(), FileAllowed(['jpg', 'png'], 'Images only!')])
+    image = FileField("Фотография", validators=[FileAllowed(['jpg', 'png'], 'Images only!')])
+    submit = SubmitField("Добавить")
+
+
+class GenreForm(FlaskForm):
+    title = StringField("Жанр", validators=[DataRequired()])
+    submit = SubmitField("Добавить")
+
+
+class ComicForm(FlaskForm):
+    title = StringField("Название", validators=[DataRequired()])
+    description = StringField("Описание", validators=[DataRequired()])
+    year = DateField("Дата выхода", format='%Y-%m-%d', default=datetime.now())
+    genres = SelectMultipleField("Жанры", coerce=int)
+    publisher = SelectField("Издатель", coerce=int)
+    author = SelectField("Автор", coerce=int)
+    image = FileField("Фотография", validators=[FileAllowed(['jpg', 'png'], 'Images only!')])
     submit = SubmitField("Добавить")

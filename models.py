@@ -9,7 +9,7 @@ class User(UserMixin, db.Model):
     login = db.Column(db.Text, unique=True, nullable=False)
     password = db.Column(db.Text, unique=False, nullable=False)
     admin = db.Column(db.Integer, unique=False, nullable=False, default=0)
-    image = db.Column(db.LargeBinary, unique=False, nullable=True)
+    image = db.Column(db.Text, unique=False, nullable=True)
 
     order = db.relationship("Order", backref="user", lazy=True)
 
@@ -36,7 +36,7 @@ class Publisher(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.Text, unique=False, nullable=False)
     contact = db.Column(db.Text, nullable=True)
-    image = db.Column(db.LargeBinary, unique=False, nullable=True)
+    image = db.Column(db.Text, unique=False, nullable=True)
 
     comic = db.relationship("Comic", backref="publicher", lazy=True)
 
@@ -50,7 +50,7 @@ class Author(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     fio = db.Column(db.Text, unique=False, nullable=False)
     bio = db.Column(db.Text, unique=False, nullable=True)
-    image = db.Column(db.LargeBinary, unique=False, nullable=True)
+    image = db.Column(db.Text, unique=False, nullable=True)
 
     comic = db.relationship("Comic", backref="author", lazy=True)
 
@@ -64,8 +64,8 @@ class Comic(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.Text, unique=False, nullable=False)
     description = db.Column(db.Text, unique=False, nullable=True)
-    year = db.Column(db.Integer, unique=False, nullable=True)
-    image = db.Column(db.LargeBinary, unique=False, nullable=True)
+    year = db.Column(db.Text, unique=False, nullable=True)
+    image = db.Column(db.Text, unique=False, nullable=True)
     publisher_id = db.Column(db.Integer, db.ForeignKey("publisher.id"), nullable=False)
     author_id = db.Column(db.Integer, db.ForeignKey("author.id"), nullable=False)
 
