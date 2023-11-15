@@ -1,5 +1,5 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, PasswordField, SubmitField, DateField, SelectField, SelectMultipleField
+from wtforms import StringField, PasswordField, SubmitField, DateField, SelectField, SelectMultipleField, DecimalField
 from wtforms.validators import DataRequired, EqualTo, ValidationError
 from flask_wtf.file import FileField, FileRequired, FileAllowed
 from models import User
@@ -46,6 +46,7 @@ class GenreForm(FlaskForm):
 class ComicForm(FlaskForm):
     title = StringField("Название", validators=[DataRequired()])
     description = StringField("Описание", validators=[DataRequired()])
+    price = DecimalField("Стоимость", places=2, validators=[DataRequired()])
     year = DateField("Дата выхода", format='%Y-%m-%d', default=datetime.now())
     genres = SelectMultipleField("Жанры", coerce=int)
     publisher = SelectField("Издатель", coerce=int)

@@ -210,6 +210,7 @@ def add_comic():
 
             title = form.title.data
             description = form.description.data
+            price = form.price.data
             year = form.year.data
             genres = form.genres.data
             publisher = form.publisher.data
@@ -219,6 +220,7 @@ def add_comic():
             newcomic = Comic(
                 title = title,
                 description = description,
+                price = float(price),
                 year = str(year),
                 image = None,
                 publisher_id = publisher,
