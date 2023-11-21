@@ -1,9 +1,10 @@
-from forms import RegisterForm, LoginForm, PublisherForm, AuthorForm, GenreForm, ComicForm
+from forms import RegisterForm, LoginForm, PublisherForm, AuthorForm, GenreForm, ComicForm, EmptyMultipleSelectForm, EmptySelectForm
 from app import login_manager, create_app, db, bcrypt
 from models import User, Order, Publisher, Author, Comic, Order_comic, Genre, Genre_comic
-from flask import render_template, flash, url_for, redirect
+from flask import render_template, flash, url_for, redirect, request
 from flask_bcrypt import check_password_hash
 from flask_login import login_user, logout_user, login_required, current_user
+from sqlalchemy.exc import IntegrityError, SQLAlchemyError
 from PIL import Image
 
 
@@ -13,6 +14,17 @@ def load_user(user_id):
 
 
 app = create_app()
+
+
+@app.route("/make_admin/<id>",  methods=("GET", "POST"))
+def make_admin(id):
+    if not current_user.is_authenticated or current_user.admin != 1:
+        return redirect(url_for('profile', id=current_user.id))
+    
+    User.query.filter_by(id = id).first().admin = True
+    db.session.commit()
+
+    return redirect(url_for('change_user'))
 
 
 @app.route("/", methods=("GET", "POST"), strict_slashes=False)
@@ -32,9 +44,16 @@ def login():
                 login_user(user)
                 return redirect(url_for('index'))
             else:
-                flash("Invalid Username or password!", "danger")
-        except Exception as e:
-            flash(e, "danger")
+                flash("Ошибка логина или пароля!", "danger")
+        
+        except IntegrityError as e:
+            db.session.rollback() 
+            print(str(e))
+            flash("Ошибка при входе в аккаунт", "danger")
+        
+        except SQLAlchemyError as e:
+            db.session.rollback() 
+            print(str(e))
 
     return render_template("login.html", form=form, user=current_user)
 
@@ -61,8 +80,14 @@ def register():
             flash(f"Account Succesfully created", "success")
             return redirect(url_for("login"))
 
-        except Exception as e:
-            flash(e, "danger")
+        except IntegrityError as e:
+            db.session.rollback() 
+            print(str(e))
+            flash("Ошибка при регистрации аккаунта", "danger")
+        
+        except SQLAlchemyError as e:
+            db.session.rollback() 
+            print(str(e))
 
     return render_template("register.html", form=form, user=current_user)
 
@@ -84,16 +109,20 @@ def profile(id):
 @app.route("/admin/",  methods=("GET", "POST"))
 def admin():
     if not current_user.is_authenticated or current_user.admin != 1:
-        return redirect(url_for('profile'))
+        return redirect(url_for('profile', id=current_user.id))
     return render_template("admin.html", user=current_user)
 
 
 @app.route("/add_author", methods=("GET", "POST"))
 def add_author():
     if not current_user.is_authenticated or current_user.admin != 1:
-        return redirect(url_for('profile'))
+        return redirect(url_for('profile', id=current_user.id))
     
     form = AuthorForm()
+    output_form = EmptyMultipleSelectForm()
+    output_form.multi_list.label.text = "Авторы: "
+    output_form.multi_list.choices = [(item.id, item.fio) for item in Author.query.all()]
+    output_form.submit.label.text = "Удалить"
 
     if form.validate_on_submit():
         try:
@@ -121,19 +150,49 @@ def add_author():
             flash(f"Автор добавлен", "success")
             return redirect(url_for(admin.__name__))
 
-        except Exception as e:
-            flash(e, "danger")
+        
+        except IntegrityError as e:
+            db.session.rollback() 
+            print(str(e))
+            flash("Ошибка при добавлении Автора в БД", "danger")
+        
+        except SQLAlchemyError as e:
+            db.session.rollback() 
+            print(str(e))
 
+    elif output_form.validate_on_submit():
+        try:
 
-    return render_template("add_author.html", form=form, user=current_user)
+            for i in output_form.multi_list.data:
+                Author.query.filter_by(id = i).delete()
+
+            db.session.commit()
+            flash(f"Автор удален", "success")
+
+        except IntegrityError as e:
+            db.session.rollback() 
+            print(str(e))
+            flash("Ошибка при удалении Автора из БД", "danger")
+        
+        except SQLAlchemyError as e:
+            db.session.rollback() 
+            print(str(e))
+
+    output_form.multi_list.choices = [(item.id, item.fio) for item in Author.query.all()]
+
+    return render_template("add_author.html", form=form, user=current_user, form2 = output_form)
 
 
 @app.route("/add_publisher", methods=("GET", "POST"))
 def add_publisher():
     if not current_user.is_authenticated or current_user.admin != 1:
-        return redirect(url_for('profile'))
+        return redirect(url_for('profile', id=current_user.id))
     
     form = PublisherForm()
+    output_form = EmptyMultipleSelectForm()
+    output_form.multi_list.label.text = "Издатели: "
+    output_form.multi_list.choices = [(item.id, item.title) for item in Publisher.query.all()]
+    output_form.submit.label.text = "Удалить"
 
     if form.validate_on_submit():
         try:
@@ -161,18 +220,48 @@ def add_publisher():
             flash(f"Издательство добавлено", "success")
             return redirect(url_for(admin.__name__))
 
-        except Exception as e:
-            flash(e, "danger")
+        except IntegrityError as e:
+            db.session.rollback() 
+            print(str(e))
+            flash("Ошибка при добавлении Издателя в БД", "danger")
+        
+        except SQLAlchemyError as e:
+            db.session.rollback() 
+            print(str(e))
 
-    return render_template("add_publisher.html", form=form, user=current_user)
+    elif output_form.validate_on_submit():
+        try:
+
+            for i in output_form.multi_list.data:
+                Publisher.query.filter_by(id = i).delete()
+
+            db.session.commit()
+            flash(f"Издатель удален", "success")
+
+        except IntegrityError as e:
+            db.session.rollback() 
+            print(str(e))
+            flash("Ошибка при удалении Издателя из БД", "danger")
+        
+        except SQLAlchemyError as e:
+            db.session.rollback() 
+            print(str(e))
+
+    output_form.multi_list.choices = [(item.id, item.title) for item in Publisher.query.all()]
+
+    return render_template("add_publisher.html", form=form, user=current_user, form2 = output_form)
 
 
 @app.route("/add_genre", methods=["POST", "GET"])
 def add_genre():
     if not current_user.is_authenticated or current_user.admin != 1:
-        return redirect(url_for('profile'))
+        return redirect(url_for('profile', id=current_user.id))
     
     form = GenreForm()
+    output_form = EmptyMultipleSelectForm()
+    output_form.multi_list.label.text = "Жанры: "
+    output_form.multi_list.choices = [(item.id, item.title) for item in Genre.query.all()]
+    output_form.submit.label.text = "Удалить"
 
     if form.validate_on_submit():
         try:
@@ -185,20 +274,49 @@ def add_genre():
             db.session.add(newgenre)
             db.session.commit()
             flash(f"Жанр добавлен", "success")
-            return redirect(url_for(admin.__name__))
 
-        except Exception as e:
-            flash(e, "danger")
+        except IntegrityError as e:
+            db.session.rollback() 
+            print(str(e))
+            flash("Ошибка при добавлении Жанра в БД", "danger")
+        
+        except SQLAlchemyError as e:
+            db.session.rollback() 
+            print(str(e))
 
-    return render_template("add_genre.html", form=form, user=current_user)
+    elif output_form.validate_on_submit():
+        try:
+
+            for i in output_form.multi_list.data:
+                Genre.query.filter_by(id = i).delete()
+
+            db.session.commit()
+            flash(f"Жанр удален", "success")
+
+        except IntegrityError as e:
+            db.session.rollback() 
+            print(str(e))
+            flash("Ошибка при удалении Жанра из БД", "danger")
+        
+        except SQLAlchemyError as e:
+            db.session.rollback() 
+            print(str(e))
+
+    output_form.multi_list.choices = [(item.id, item.title) for item in Genre.query.all()]
+
+    return render_template("add_genre.html", form=form, user=current_user, form2 = output_form)
 
 
 @app.route("/add_comic", methods=["POST", "GET"])
 def add_comic():
     if not current_user.is_authenticated or current_user.admin != 1:
-        return redirect(url_for('profile'))
+        return redirect(url_for('profile', id=current_user.id))
     
     form = ComicForm()
+    output_form = EmptyMultipleSelectForm()
+    output_form.multi_list.label.text = "Жанры: "
+    output_form.multi_list.choices = [(item.id, f"{item.title} - {Author.query.filter_by(id = item.author_id).first().fio}") for item in Comic.query.all()]
+    output_form.submit.label.text = "Удалить"
 
     # Сортировать жанры
     form.genres.choices = [(item.id, item.title) for item in Genre.query.all()]
@@ -249,10 +367,61 @@ def add_comic():
             flash(f"Комикс добавлен", "success")
             return redirect(url_for(admin.__name__))
 
-        except Exception as e:
-            flash(e, "danger")
+        except IntegrityError as e:
+            db.session.rollback() 
+            print(str(e))
+            flash("Ошибка при добавлении Комикса в БД", "danger")
+        
+        except SQLAlchemyError as e:
+            db.session.rollback() 
+            print(str(e))
 
-    return render_template("add_comic.html", form=form, user=current_user)
+    elif output_form.validate_on_submit():
+        try:
+
+            for i in output_form.multi_list.data:
+                Comic.query.filter_by(id = i).delete()
+
+            db.session.commit()
+            flash(f"Комикс удален", "success")
+
+        except IntegrityError as e:
+            db.session.rollback() 
+            print(str(e))
+            flash("Ошибка при удалении Комикса БД", "danger")
+        
+        except SQLAlchemyError as e:
+            db.session.rollback() 
+            print(str(e))
+
+    output_form.multi_list.choices = [(item.id, f"{item.title} - {Author.query.filter_by(id = item.author_id).first().fio}") for item in Comic.query.all()]
+
+    return render_template("add_comic.html", form=form, user=current_user, form2 = output_form)
+
+
+@app.route("/change_user", methods=["POST", "GET"])
+def change_user():
+    if not current_user.is_authenticated or current_user.admin != 1:
+        return redirect(url_for('profile', id=current_user.id))
+    
+    form = EmptySelectForm()
+    form.one_list.label.text = "Пользователи: "
+    form.submit.label.text = "Редактировать"
+    form.one_list.choices = [(item.id, item.login) for item in User.query.all() if item.id != current_user.id]
+    form2 = None
+    user_form = None
+
+    if form.validate_on_submit():
+        try:
+            user_form = User.query.filter_by(id = form.one_list.data).first()
+        
+        except SQLAlchemyError as e:
+            db.session.rollback() 
+            print(str(e))
+            flash("Ошибка с БД", "danger")
+    
+
+    return render_template("change_user.html", form=form, user=current_user, user_form=user_form, form2=form2)
 
 
 @app.errorhandler(404)

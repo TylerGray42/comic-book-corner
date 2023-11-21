@@ -53,3 +53,13 @@ class ComicForm(FlaskForm):
     author = SelectField("Автор", coerce=int)
     image = FileField("Фотография", validators=[FileAllowed(['jpg', 'png'], 'Images only!')])
     submit = SubmitField("Добавить")
+
+
+class EmptyMultipleSelectForm(FlaskForm):
+    multi_list = SelectMultipleField(coerce=int)
+    submit = SubmitField()
+
+
+class EmptySelectForm(FlaskForm):
+    one_list = SelectField(coerce=int)
+    submit = SubmitField()

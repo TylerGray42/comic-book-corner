@@ -3,4 +3,4 @@ __pycache__/
 .vscode/
 images/
 .task.txt
-.pass
+config.py

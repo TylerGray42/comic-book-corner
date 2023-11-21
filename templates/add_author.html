@@ -3,18 +3,41 @@
 {% block content %}
 
 <br />
-<form method="POST" enctype="multipart/form-data">
-    {{form.hidden_tag()}}
 
-    {{form.fio.label(class="form-label")}}
-    {{form.fio(class="form-control")}}
-    {{form.bio.label(class="form-label")}}
-    {{form.bio(class="form-control")}}
-    {{form.image.label(class="form-label")}}
-    {{form.image(class="form-control")}}
-    <br />
-    {{form.submit(class="btn btn-secondary")}}
-</form>
-</form>
+<div style="width: 100%; height: 650px;">  
+    {% with messages=get_flashed_messages(with_categories=true) %}
+        {% for category, message in messages %}
+        <div class='alert alert-{{category}} text-center alert-dismissible fade show m-auto'>
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        {% endfor %}
+    {% endwith %}  
+    <div style="width: 50%; float:left;">  
+        <form method="POST" enctype="multipart/form-data">
+            {{form.hidden_tag()}}
+
+            {{form.fio.label(class="form-label")}}
+            {{form.fio(class="form-control")}}
+            {{form.bio.label(class="form-label")}}
+            {{form.bio(class="form-control")}}
+            {{form.image.label(class="form-label")}}
+            {{form.image(class="form-control")}}
+            <br />
+            {{form.submit(class="btn btn-secondary")}}
+        </form>
+    </div>  
+
+    <div style="width:50%; float:left;">  
+        <form method="POST" enctype="multipart/form-data">
+            {{form2.hidden_tag()}}
+        
+            {{form2.multi_list.label(class="form-label")}}
+            {{form2.multi_list(class="form-control")}}
+            <br />
+            {{form2.submit(class="btn btn-secondary")}}
+        </form>
+    </div>  
+</div>    
 
 {% endblock %}
