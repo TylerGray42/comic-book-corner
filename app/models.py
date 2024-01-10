@@ -1,8 +1,7 @@
-from flask_sqlalchemy import SQLAlchemy
 from flask_login import UserMixin
 from sqlalchemy.dialects.mysql import INTEGER, TINYINT, TINYTEXT, TEXT, DATE, DATETIME, BOOLEAN, DECIMAL
+from app.extensions import db
 
-db = SQLAlchemy()
 
 class User(UserMixin, db.Model):
     __tablename__ = "user"
@@ -68,6 +67,7 @@ class Comic(db.Model):
     title = db.Column(TINYTEXT, unique=False, nullable=False)
     description = db.Column(TEXT, unique=False, nullable=True)
     price = db.Column(DECIMAL(precision=19, scale=2), unique=False, nullable=False)
+    amount = db.Column(INTEGER(unsigned = True), nullable=False, unique=False, default=0)
     year = db.Column(DATE, unique=False, nullable=True)
     image = db.Column(TEXT, unique=False, nullable=True)
     publisher_id = db.Column(INTEGER(unsigned = True), db.ForeignKey("publisher.id"), nullable=False)

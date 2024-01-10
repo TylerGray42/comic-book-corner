@@ -1,7 +1,9 @@
 from flask import Blueprint
+from flask import render_template
+from flask_login import current_user
 
 main_bp = Blueprint('main', __name__)
 
 @main_bp.route('/')
 def index():
-    return 'Main page'
+    return render_template("main/index.html", user=current_user)
