@@ -27,10 +27,10 @@
                         {% else %}
                         <li><a class="dropdown-item" href="#">Профиль</a></li>
                         {% endif %}
-                        <li><a class="dropdown-item" href="#">Выход</a></li>
+                        <li><a class="dropdown-item" href="{{ url_for('auth.logout') }}">Выход</a></li>
                         {% else %}
-                        <li><a class="dropdown-item" href="#">Вход</a></li>
-                        <li><a class="dropdown-item" href="#">Регистрация</a></li>
+                        <li><a class="dropdown-item" href="{{ url_for('auth.login') }}">Вход</a></li>
+                        <li><a class="dropdown-item" href="{{ url_for('auth.register') }}">Регистрация</a></li>
                         {% endif %}
                     </ul>
                 </li>
