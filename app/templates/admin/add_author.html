@@ -1,0 +1,89 @@
+{% extends 'main/base.html' %}
+
+{% block content %}
+
+<br />
+<div id="notification-container" class="m-auto"></div>
+<br />
+
+<form method="POST" enctype="multipart/form-data" id="author-form" onsubmit="add_author(event)">
+    {{form.hidden_tag()}}
+
+    {{form.fio.label(class="form-label")}}
+    {{form.fio(class="form-control")}}
+    {{form.bio.label(class="form-label")}}
+    {{form.bio(class="form-control")}}
+    {{form.image.label(class="form-label")}}
+    {{form.image(class="form-control")}}
+    <br />
+    {{form.submit(class="btn btn-secondary")}}
+</form>
+
+<br />
+
+{% include 'main/table_search.html' %}
+
+<script>
+    function add_author(event) {
+        event.preventDefault();
+
+        var formData = new FormData(document.getElementById('author-form'));
+
+        fetch('/admin/add_author', {
+            method: 'POST',
+            body: formData
+        })
+            .then(response => response.json()) 
+            .then(data => {
+                console.log(data);
+
+                if (data.message) {
+
+                    showNotification(data.message, data.category);
+
+                    var table = document.getElementById('tableSearch');
+
+                    var newRow = table.insertRow(-1);
+
+                    var cell1 = newRow.insertCell(0);
+                    cell1.textContent = formData.get('fio');
+
+                    var cell2 = newRow.insertCell(1);
+                    cell2.textContent = formData.get('bio');
+
+                    var cell3 = newRow.insertCell(2);
+                    var imageButton = document.createElement('button');
+                    imageButton.id = 'button-image-' + data.id;
+                    imageButton.type = 'button';
+                    imageButton.classList.add('btn', 'btn-outline-info');
+                    imageButton.textContent = 'Фото';
+                    imageButton.setAttribute('data-bs-toggle', 'modal');
+                    imageButton.setAttribute('data-bs-target', '#image_modal');
+                    imageButton.setAttribute('data-image', data.image_path);
+                    cell3.appendChild(imageButton);
+                    
+
+                    var cell4 = newRow.insertCell(3);
+                    var deleteButton = document.createElement('button');
+                    deleteButton.id = 'button-delete-' + data.id;
+                    deleteButton.type = 'button';
+                    deleteButton.classList.add('btn', 'btn-outline-danger');
+                    deleteButton.textContent = 'Удалить';
+                    deleteButton.addEventListener('click', function () {
+                        delete_item(data.id, 'author');
+                    });
+                    cell4.appendChild(deleteButton);
+
+                    document.getElementById('author-form').reset();
+                } else {
+                    console.error('Ошибка при добавлении автора:', data.error);
+                }
+            })
+            .catch(error => {
+                console.error('Ошибка при отправке запроса на сервер:', error);
+            });
+    }
+
+</script>
+
+{% endblock %}

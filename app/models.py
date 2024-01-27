@@ -26,7 +26,7 @@ class Order(db.Model):
     time = db.Column(DATETIME, unique=False, nullable=False)
     user_id = db.Column(INTEGER(unsigned = True), db.ForeignKey("user.id"), nullable=False)
 
-    order_comic = db.relationship("Order_comic", backref="order", lazy=True)
+    order_comic = db.relationship("Order_comic", backref="order", lazy=True, cascade='all, delete-orphan', passive_deletes=True)
 
     def __repr__(self):
         return '<Order %r>' % self.id
@@ -73,8 +73,8 @@ class Comic(db.Model):
     publisher_id = db.Column(INTEGER(unsigned = True), db.ForeignKey("publisher.id"), nullable=False)
     author_id = db.Column(INTEGER(unsigned = True), db.ForeignKey("author.id"), nullable=False)
 
-    order_comic = db.relationship("Order_comic", backref="comic", lazy=True)
-    genre_comic = db.relationship("Genre_comic", backref="comic", lazy=True)
+    order_comic = db.relationship("Order_comic", backref="comic", lazy=True, cascade='all, delete-orphan', passive_deletes=True)
+    genre_comic = db.relationship("Genre_comic", backref="comic", lazy=True, cascade='all, delete-orphan', passive_deletes=True)
 
     def __repr__(self):
         return '<Comic %r>' % self.id
@@ -85,8 +85,8 @@ class Order_comic(db.Model):
 
     id = db.Column(INTEGER(unsigned = True), primary_key=True)
     count = db.Column(TINYINT(unsigned = True), unique=False, nullable=False, default=1)
-    order_id = db.Column(INTEGER(unsigned = True), db.ForeignKey("order.id"), nullable=False)
-    comic_id = db.Column(INTEGER(unsigned = True), db.ForeignKey("comic.id"), nullable=False)
+    order_id = db.Column(INTEGER(unsigned = True), db.ForeignKey("order.id", ondelete="CASCADE"), nullable=False)
+    comic_id = db.Column(INTEGER(unsigned = True), db.ForeignKey("comic.id", ondelete="CASCADE"), nullable=False)
 
     def __repr__(self):
         return '<Order_comic %r>' % self.id
@@ -97,8 +97,9 @@ class Genre(db.Model):
 
     id = db.Column(INTEGER(unsigned = True), primary_key=True)
     title = db.Column(TINYTEXT, unique=True, nullable=False)
+    description = db.Column(TEXT, unique=False, nullable=True)
 
-    genre_comic = db.relationship("Genre_comic", backref="genre", lazy=True)
+    genre_comic = db.relationship("Genre_comic", backref="genre", lazy=True, cascade='all, delete-orphan', passive_deletes=True)
 
     def __repr__(self):
         return '<Genre %r>' % self.genre
@@ -107,8 +108,8 @@ class Genre(db.Model):
 class Genre_comic(db.Model):
     __tablename__ = "genre_comic"
 
-    comic_id = db.Column(INTEGER(unsigned = True), db.ForeignKey("comic.id"), primary_key=True, nullable=False)
-    genre_id = db.Column(INTEGER(unsigned = True), db.ForeignKey("genre.id"), primary_key=True, nullable=False)
+    comic_id = db.Column(INTEGER(unsigned = True), db.ForeignKey("comic.id", ondelete="CASCADE"), primary_key=True, nullable=False)
+    genre_id = db.Column(INTEGER(unsigned = True), db.ForeignKey("genre.id", ondelete="CASCADE"), primary_key=True, nullable=False)
 
     def __repr__(self):
         return '<Genre_comic %r>' % self.id

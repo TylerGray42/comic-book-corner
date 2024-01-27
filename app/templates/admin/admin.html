@@ -1,0 +1,32 @@
+{% extends 'main/base.html' %}
+
+{% block content %}
+
+{% with messages=get_flashed_messages(with_categories=true) %}
+<br />
+{% for category, message in messages %}
+<div class='alert alert-{{category}} text-center alert-dismissible fade show m-auto'>
+    {{ message }}
+    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+</div>
+{% endfor %}
+{% endwith %}
+
+<br />
+
+<div class="d-grid gap-2 col-6 mx-auto">
+    <button data-bs-target="#add-collapse" class="btn btn-secondary d-inline-flex align-items-center dropdown-toggle collapsed" aria-expanded="false" data-bs-toggle="collapse">
+        Изменить список
+    </button>
+    <div class="collapse" id="add-collapse">
+        <ul class="btn-toggle-nav list-unstyled d-grid gap-2">
+            <a type="button" class="btn btn-secondary" href="{{ url_for('admin.add_comic') }}">Комиксов</a>
+            <a type="button" class="btn btn-secondary" href="{{ url_for('admin.add_author') }}">Авторов</a>
+            <a type="button" class="btn btn-secondary" href="{{ url_for('admin.add_publisher') }}">Издателей</a>
+            <a type="button" class="btn btn-secondary" href="{{ url_for('admin.add_genre') }}">Жанров</a>
+        </ul>
+    </div>
+    <a type="button" class="btn btn-secondary" href="#">Управление пользователями</a>
+</div>
+
+{% endblock %}

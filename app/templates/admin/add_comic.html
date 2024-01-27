@@ -1,0 +1,118 @@
+{% extends 'main/base.html' %}
+
+{% block content %}
+
+<br />
+<div id="notification-container" class="m-auto"></div>
+<br />
+
+<form method="POST" enctype="multipart/form-data" id="comic-form" onsubmit="add_comic(event)">
+    {{form.hidden_tag()}}
+
+    {{form.title.label(class="form-label")}}
+    {{form.title(class="form-control")}}
+    {{form.description.label(class="form-label")}}
+    {{form.description(class="form-control")}}
+    {{form.price.label(class="form-label")}}
+    {{form.price(class="form-control")}}
+    {{form.amount.label(class="form-label")}}
+    {{form.amount(class="form-control")}}
+    {{form.year.label(class="form-label")}}
+    {{form.year(class="form-control")}}
+    {{form.genres.label(class="form-label")}}
+    {{form.genres(class="form-control")}}
+    {{form.publisher.label(class="form-label")}}
+    {{form.publisher(class="form-control")}}
+    {{form.author.label(class="form-label")}}
+    {{form.author(class="form-control")}}
+    {{form.image.label(class="form-label")}}
+    {{form.image(class="form-control")}}
+    <br />
+    {{form.submit(class="btn btn-secondary")}}
+</form>
+
+<br />
+
+{% include 'main/table_search.html' %}
+
+<script>
+    function add_comic(event) {
+        event.preventDefault();
+
+        var formData = new FormData(document.getElementById('comic-form'));
+
+        fetch('/admin/add_comic', {
+            method: 'POST',
+            body: formData
+        })
+            .then(response => response.json())
+            .then(data => {
+                console.log(data);
+
+                if (data.message) {
+
+                    showNotification(data.message, data.category);
+
+                    var table = document.getElementById('tableSearch');
+
+                    var newRow = table.insertRow(-1);
+
+                    var cell1 = newRow.insertCell(0);
+                    cell1.textContent = formData.get('title');
+
+                    var cell2 = newRow.insertCell(1);
+                    cell2.textContent = formData.get('description');
+
+                    var cell3 = newRow.insertCell(2);
+                    cell3.textContent = formData.get('price');
+
+                    var cell4 = newRow.insertCell(3);
+                    cell4.textContent = formData.get('amount');
+
+                    var cell5 = newRow.insertCell(4);
+                    cell5.textContent = formData.get('year');
+
+                    var cell6 = newRow.insertCell(5);
+                    cell6.textContent = data.genres;
+
+                    var cell7 = newRow.insertCell(6);
+                    cell7.textContent = data.publisher;
+
+                    var cell8 = newRow.insertCell(7);
+                    cell8.textContent = data.author;
+
+                    var cell9 = newRow.insertCell(8);
+                    var imageButton = document.createElement('button');
+                    imageButton.id = 'button-image-' + data.id;
+                    imageButton.type = 'button';
+                    imageButton.classList.add('btn', 'btn-outline-info');
+                    imageButton.textContent = 'Фото';
+                    imageButton.setAttribute('data-bs-toggle', 'modal');
+                    imageButton.setAttribute('data-bs-target', '#image_modal');
+                    imageButton.setAttribute('data-image', data.image_path);
+                    cell9.appendChild(imageButton);
+
+                    var cell10 = newRow.insertCell(9);
+                    var deleteButton = document.createElement('button');
+                    deleteButton.id = 'button-delete-' + data.id;
+                    deleteButton.type = 'button';
+                    deleteButton.classList.add('btn', 'btn-outline-danger');
+                    deleteButton.textContent = 'Удалить';
+                    deleteButton.addEventListener('click', function () {
+                        delete_item(data.id, 'comic');
+                    });
+                    cell10.appendChild(deleteButton);
+
+                    document.getElementById('comic-form').reset();
+                } else {
+                    console.error('Ошибка при добавлении комикса:', data.error);
+                }
+            })
+            .catch(error => {
+                console.error('Ошибка при отправке запроса на сервер:', error);
+            });
+    }
+
+</script>
+
+{% endblock %}

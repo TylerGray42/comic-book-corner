@@ -12,17 +12,6 @@
 {% endfor %}
 {% endwith %}
 
-<br />
-
-<form method="POST">
-    {{form.hidden_tag()}}
-
-    {{form.user_login.label(class="form-label")}}
-    {{form.user_login(class="form-control")}}
-    {{form.user_password.label(class="form-label")}}
-    {{form.user_password(class="form-control")}}
-    <br />
-    {{form.submit(class="btn btn-secondary")}}
-</form>
+<h1>Привет, ты - {{user.username}}!</h1>
 
 {% endblock %}

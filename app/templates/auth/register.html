@@ -2,8 +2,8 @@
 
 {% block content %}
 
-<br />
 {% with messages=get_flashed_messages(with_categories=true) %}
+<br />
 {% for category, message in messages %}
 <div class='alert alert-{{category}} text-center alert-dismissible fade show m-auto'>
     {{ message }}
@@ -11,6 +11,8 @@
 </div>
 {% endfor %}
 {% endwith %}
+
+<br />
 
 <form method="POST">
     {{form.hidden_tag()}}

@@ -1,0 +1,104 @@
+<div class="container">
+    <input class="form-control mb-4" type="text" placeholder="Введите текст для поиска" id="searchInput">
+
+    <table class="table table-bordered table-striped w-auto" id="tableSearch">
+        <thead>
+            <tr>
+                {% for i in head %}
+                <th>{{i}}</th>
+                {% endfor %}
+                <th></th>
+            </tr>
+        </thead>
+        <tbody id="myTable">
+            {% for i in body %}
+            <tr>
+                {% for item in i %}
+                {% if item[0] == 'text' %}
+                <td>{{item[1]}}</td>
+                {% elif item[0] == 'del_button'%}
+                <td><button id="button-delete-{{i[0][1]}}" type="button" class="btn btn-outline-danger"
+                        onclick="delete_item('{{i[0][1]}}', '{{item_type}}')">{{item[1]}}</button></td>
+                {% elif item[0] == 'image_button'%}
+                <td><button id="button-image-{{i[0][1]}}" type="button" class="btn btn-outline-info"
+                        data-bs-toggle="modal" data-bs-target="#image_modal" 
+                        {% if item[2] %}
+                        data-image="{{ url_for('static', filename=item[2]) }}" 
+                        {% else %} data-image="{{ url_for('static', filename='images/placeholder.jpeg') }}" 
+                        {% endif %}">{{item[1]}}</button></td>
+                {% endif %}
+                {% endfor %}
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+
+<div class="modal fade" id="image_modal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <img id="modal-image" src="" />
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<script>
+
+    function delete_item(genre_id, item_type) {
+
+        var url = `/admin/delete_item?id=${genre_id}&item_type=${item_type}`;
+
+        fetch(url, {
+            method: 'DELETE'
+        })
+            .then(response => response.json())
+            .then(data => {
+                console.log(data);
+
+                if (data.message) {
+                    showNotification(data.message, data.category);
+
+                    var rowToDelete = document.getElementById('button-delete-' + genre_id).parentNode.parentNode;
+
+                    rowToDelete.parentNode.removeChild(rowToDelete);
+                } else {
+                    console.error('Ошибка при удалении жанра:', data.error);
+                }
+            })
+            .catch(error => {
+                console.error('Ошибка при отправке запроса на сервер:', error);
+            });
+    }
+
+    document.addEventListener("DOMContentLoaded", function () {
+        // Поиск по таблице
+        var searchInput = document.getElementById("searchInput");
+        searchInput.addEventListener("input", function () {
+            var value = this.value.toLowerCase();
+            var rows = document.querySelectorAll("#myTable tr");
+
+            rows.forEach(function (row) {
+                var text = row.textContent.toLowerCase();
+                row.style.display = text.includes(value) ? "" : "none";
+            });
+        });
+
+        // Отображение модального окна
+        var modal = document.getElementById('image_modal');
+        modal.addEventListener('show.bs.modal', function (event) {
+            var button = event.relatedTarget; // Кнопка, которая открыла модальное окно
+            var imageSrc = button.getAttribute('data-image'); // Извлечение адреса изображения из атрибута data-image
+            var modalImage = document.getElementById('modal-image');
+            
+            modalImage.setAttribute('src', imageSrc);
+        });
+    });
+
+</script>
