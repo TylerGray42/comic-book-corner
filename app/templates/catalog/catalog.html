@@ -1,0 +1,259 @@
+{% extends 'main/base.html' %}
+
+{% block content %}
+
+
+<div class="d-flex align-items-stretch">
+    <section class="left-sidebar">
+        <div class="" style="width: 280px;">
+
+            <div class="dropdown-container" data-search-type="author">
+                <div class="dropdown-button">
+                    <div class="dropdown-label">Авторы </div>
+                    <div class="dropdown-quantity">(<span class="quantity">0</span>)</div>
+                    <i class="fa fa-chevron-down"></i>
+                </div>
+                <div class="dropdown-list" style="display: block;">
+                    <input type="search" placeholder="Search states" class="dropdown-search">
+                    <ul>
+                        {% for author in author_list%}
+                        <li>
+                            <label class="checkbox-wrap">
+                                <input name="{{ author[0] }}" type="checkbox">
+                                <span for="{{ author[0] }}"> {{ author[1] }} </span>
+                            </label>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+
+            <div class="dropdown-container" data-search-type="publisher">
+                <div class="dropdown-button">
+                    <div class="dropdown-label">Издатели </div>
+                    <div class="dropdown-quantity">(<span class="quantity">0</span>)</div>
+                    <i class="fa fa-chevron-down"></i>
+                </div>
+                <div class="dropdown-list" style="display: block;">
+                    <input type="search" placeholder="Search states" class="dropdown-search">
+                    <ul>
+                        {% for publisher in publisher_list %}
+                        <li>
+                            <label class="checkbox-wrap">
+                                <input name="{{ publisher[0] }}" type="checkbox">
+                                <span for="{{ publisher[0] }}"> {{ publisher[1] }} </span>
+                            </label>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+
+            <div class="dropdown-container" data-search-type="genre">
+                <div class="dropdown-button">
+                    <div class="dropdown-label">Жанры </div>
+                    <div class="dropdown-quantity">(<span class="quantity">0</span>)</div>
+                    <i class="fa fa-chevron-down"></i>
+                </div>
+                <div class="dropdown-list" style="display: block;">
+                    <input type="search" placeholder="Search states" class="dropdown-search">
+                    <ul>
+                        {% for genre in genre_list%}
+                        <li>
+                            <label class="checkbox-wrap">
+                                <input name="{{ genre[0] }}" type="checkbox">
+                                <span for="{{ genre[0] }}"> {{ genre[1] }} </span>
+                            </label>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+
+        </div>
+    </section>
+    <div class="content">
+        <div class="row row-cols-1 row-cols-md-4">
+            {% for comic in comic_list %}
+            <div class="col p-2">
+                <div class="card h-100">
+                    <svg class="bd-placeholder-img card-img-top" width="100%" height="180"
+                        xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Placeholder"
+                        preserveAspectRatio="xMidYMid slice" focusable="false">
+                        <title>Placeholder</title>
+                        <rect width="100%" height="100%" fill="#868e96"></rect>
+                    </svg>
+                    <div class="card-body">
+                        <h5 class="card-title">{{ comic[1] }}</h5>
+                        <p class="card-text">{{ comic[2] }}</p>
+                    </div>
+                    <div class="card-footer text-end">
+                        {{ comic[3] }} руб. 
+                        <a href="#" class="btn btn-primary">В корзину</a>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        <div>
+            <nav aria-label="page-navigation">
+                <ul class="pagination justify-content-end">
+                    <li class="page-item">
+                        <a class="page-link">В начало</a>
+                    </li>
+                    <li class="page-item"><button class="page-link" data-page="1" onclick="change_page(1)">1</button>
+                    </li>
+                    <li class="page-item"><button class="page-link" data-page="2" onclick="change_page(2)">2</button>
+                    </li>
+                    <li class="page-item"><button class="page-link" data-page="3" onclick="change_page(3)">3</button>
+                    </li>
+                    <li class="page-item"><button class="page-link">...</button></li>
+                    <li class="page-item">
+                        <a class="page-link" href="#">В конец</a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+    </div>
+</div>
+
+
+<script>
+
+    function search_comic(data) {
+        var url = '/catalog?';
+
+        var urlParams = new URLSearchParams(window.location.search);
+        var currentPage = urlParams.get('page');
+
+        url += currentPage ? "page=" + currentPage + "&" : "";
+
+        for (var searchType in data) {
+            if (data[searchType].length) {
+                var values = data[searchType].join('+');
+                url += searchType + '=' + encodeURIComponent(values) + '&';
+            }
+        }
+
+        url = url.slice(0, -1);
+
+        window.location.href = url;
+    }
+
+    function change_page(page_number) {
+
+        var url = window.location.href;
+
+        if (url.indexOf('page=') !== -1) {
+            var new_url = url.replace(/(page=)[^\&]+/, '$1' + page_number);
+            window.location.href = new_url;
+        } else {
+            var separator = url.indexOf('?') !== -1 ? '&' : '?';
+            window.location.href = url + separator + 'page=' + page_number;
+        }
+    }
+
+    function select_all_data() {
+        var allSelectedData = {};
+
+        document.querySelectorAll('.dropdown-container').forEach(function (dropdownContainer) {
+            var searchType = dropdownContainer.getAttribute('data-search-type');
+            var checkedBoxes = dropdownContainer.querySelectorAll('[type="checkbox"]:checked');
+
+            var searchData = [];
+            checkedBoxes.forEach(function (checkbox) {
+                searchData.push(checkbox.name);
+            });
+
+            allSelectedData[searchType] = searchData;
+        });
+
+        return allSelectedData;
+    }
+
+    function update_checkbox() {
+
+        var urlParams = new URLSearchParams(window.location.search);
+
+        var currentPage = urlParams.get('page');
+
+        var pressedButton = currentPage ? document.querySelector('.page-link[data-page="' + currentPage + '"]') : document.querySelector('.page-link[data-page="1"]');
+
+        if (pressedButton) {
+            pressedButton.closest('.page-item').classList.add('disabled');
+        }
+
+        document.querySelectorAll('.dropdown-container').forEach(function (container) {
+            var searchType = container.getAttribute('data-search-type');
+            var checkboxes = container.querySelectorAll('[type="checkbox"]');
+
+            checkboxes.forEach(function (checkbox) {
+                var checkboxName = checkbox.name;
+
+                if (urlParams.has(searchType) && urlParams.get(searchType).includes(checkboxName)) {
+                    checkbox.checked = true;
+                } else {
+                    checkbox.checked = false;
+                }
+            });
+
+            var checkedBoxes = container.querySelectorAll('[type="checkbox"]:checked');
+            var checked = checkedBoxes.length
+
+            container.querySelector('.quantity').textContent = checked || '0';
+
+        });
+    }
+
+
+    document.addEventListener('DOMContentLoaded', function () {
+
+        document.querySelectorAll('.dropdown-container').forEach(function (container) {
+            container.addEventListener('click', function (event) {
+                if (event.target.classList.contains('dropdown-button')) {
+                    var dropdownList = event.target.nextElementSibling;
+                    dropdownList.style.display = (dropdownList.style.display === 'none' || dropdownList.style.display === '') ? 'block' : 'none';
+                }
+            });
+
+            container.addEventListener('input', function (event) {
+                if (event.target.classList.contains('dropdown-search')) {
+                    var target = event.target;
+                    var dropdownList = target.closest('.dropdown-list');
+                    var search = target.value.toLowerCase();
+
+                    if (!search) {
+                        dropdownList.querySelectorAll('li').forEach(function (li) {
+                            li.style.display = 'block';
+                        });
+                        return false;
+                    }
+
+                    dropdownList.querySelectorAll('li').forEach(function (li) {
+                        var text = li.textContent.toLowerCase();
+                        var match = text.indexOf(search) > -1;
+                        li.style.display = match ? 'block' : 'none';
+                    });
+                }
+            });
+
+            container.addEventListener('change', function (event) {
+                if (event.target.getAttribute('type') === 'checkbox') {
+                    var cont = event.target.closest('.dropdown-container');
+                    var checkedBoxes = cont.querySelectorAll('[type="checkbox"]:checked');
+                    var checked = checkedBoxes.length
+
+                    cont.querySelector('.quantity').textContent = checked || '0';
+
+                    search_comic(select_all_data());
+
+                }
+            });
+        });
+
+        update_checkbox();
+
+    });
+</script>
+
+{% endblock %}

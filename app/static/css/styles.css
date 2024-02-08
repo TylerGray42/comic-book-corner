@@ -1,3 +1,84 @@
 body {
-    font-family: "PT Serif", serif !important;
+  font-family: "PT Serif", serif !important;
+
+  display: flex;
+  flex-direction: column;
+
+  /* fallback height */
+  min-height: 100vh;
+  /* new small viewport height for modern browsers */
+  min-height: 100svh;
+}
+
+footer {
+  margin-top: auto;
+}
+
+.dropdown-container {
+  width: 100%;
+  margin: auto 0;
+  overflow: auto;
+  border-radius: 5px;
+}
+
+.dropdown-button {
+  float: left;
+  width: 100%;
+  background: #fff;
+  padding: 15px 20px;
+  cursor: pointer;
+  border: none;
+  box-sizing: border-box;
+}
+
+.dropdown-label {
+  float: left;
+}
+
+.dropdown-quantity {
+  float: left;
+  margin-left: 4px;
+}
+
+.fa {
+  margin-top: 3px;
+  float: right;
+  font-size: 16px;
+  font: normal normal normal 14px/1 FontAwesome;
+}
+
+.dropdown-list {
+  /* float: left; */
+  /* width: 100%; */
+  /* border-top: none; */
+  box-sizing: border-box;
+  padding: 10px 20px;
+  background: #fff;
+}
+
+.dropdown-list input[type="search"] {
+  padding: 5px 10px;
+  width: 100%;
+  border: none;
+  border-radius: 4px;
+  background: rgba(0, 0, 0, 0.05);
+}
+
+.dropdown-list ul {
+  margin: 20px 0 0 0;
+  max-height: 200px;
+  overflow-y: auto;
+  padding: 0;
+  list-style-type: none;
+}
+
+.checkmark {
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
+.dropdown-list ul input[type="checkbox"] {
+  position: relative;
+  top: 2px;
 }

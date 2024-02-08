@@ -60,7 +60,6 @@
         })
             .then(response => response.json())
             .then(data => {
-                console.log(data);
 
                 if (data.message) {
                     showNotification(data.message, data.category);
@@ -86,7 +85,7 @@
 
             rows.forEach(function (row) {
                 var text = row.textContent.toLowerCase();
-                row.style.display = text.includes(value) ? "" : "none";
+                row.style.display = text.includes(value) ? "block" : "none";
             });
         });
 
