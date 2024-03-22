@@ -38,7 +38,7 @@
                 </th>
                 <td class="align-middle">
                     <div class="d-flex flex-row" style="width: 150px;">
-                        <button class="btn btn-link px-2 link-body-emphasis" onclick="">
+                        <button class="btn btn-link px-2 link-body-emphasis" onclick="updateInputValue(this, -1)">
                             <span class="material-symbols-outlined">
                                 remove
                             </span>
@@ -47,7 +47,7 @@
                         <input type="text" name="cart" value="{{ item[2].count }}" autocomplete="off"
                             class="form-control form-control-sm">
 
-                        <button class="btn btn-link px-2 link-body-emphasis" onclick="">
+                        <button class="btn btn-link px-2 link-body-emphasis" onclick="updateInputValue(this, 1)">
                             <span class="material-symbols-outlined">
                                 add
                             </span>
@@ -75,5 +75,19 @@
         </tfoot>
     </table>
 </div>
+
+<script>
+
+    function updateInputValue(button, delta) {
+        const inputField = button.parentElement.querySelector('input');
+        let oldValue = parseFloat(inputField.value);
+
+        if (oldValue + delta >= 0 && oldValue + delta <= 50) {
+            let newVal = oldValue + delta;
+            inputField.value = newVal;
+        }
+    }
+
+</script>
 
 {% endblock %}
