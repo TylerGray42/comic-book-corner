@@ -1,5 +1,5 @@
-from flask import Blueprint, request, jsonify, flash, render_template, redirect, url_for
-from flask_login import current_user, login_required
+from flask import Blueprint, request, jsonify, render_template, redirect, url_for
+from flask_login import current_user
 from sqlalchemy.exc import IntegrityError, SQLAlchemyError
 from app.forms import GenreForm, PublisherForm, AuthorForm, ComicForm
 from app.models import Genre, Publisher, Author, Comic, Genre_comic
@@ -10,8 +10,10 @@ admin_bp = Blueprint('admin', __name__)
 
 
 @admin_bp.route("/admin")
-@login_required
 def admin():
+    if not current_user.is_authenticated:
+        return redirect(url_for('auth.login'))
+    
     if current_user.admin != 1:
         return redirect(url_for('main.index', user=current_user))
 
@@ -19,8 +21,10 @@ def admin():
 
 
 @admin_bp.route("/admin/add_genre", methods=['GET', 'POST'])
-@login_required
 def add_genre():
+    if not current_user.is_authenticated:
+        return redirect(url_for('auth.login'))
+
     if current_user.admin != 1:
         return redirect(url_for('main.index', user=current_user))
 
@@ -54,8 +58,10 @@ def add_genre():
 
 
 @admin_bp.route("/admin/add_author", methods=['GET', 'POST'])
-@login_required
 def add_author():
+    if not current_user.is_authenticated:
+        return redirect(url_for('auth.login'))
+    
     if current_user.admin != 1:
         return redirect(url_for('main.index', user=current_user))
     
@@ -98,8 +104,10 @@ def add_author():
 
 
 @admin_bp.route("/admin/add_publisher", methods=['GET', 'POST'])
-@login_required
 def add_publisher():
+    if not current_user.is_authenticated:
+        return redirect(url_for('auth.login'))
+    
     if current_user.admin != 1:
         return redirect(url_for('main.index', user=current_user))
 
@@ -141,8 +149,10 @@ def add_publisher():
 
 
 @admin_bp.route("/admin/add_comic", methods=['GET', 'POST'])
-@login_required
 def add_comic():
+    if not current_user.is_authenticated:
+        return redirect(url_for('auth.login'))
+    
     if current_user.admin != 1:
         return redirect(url_for('main.index', user=current_user))
 
@@ -218,8 +228,10 @@ def add_comic():
 
 
 @admin_bp.route("/admin/delete_item", methods=['GET', 'DELETE'])
-@login_required
 def delete_item():
+    if not current_user.is_authenticated:
+        return redirect(url_for('auth.login'))
+    
     if current_user.admin != 1:
         return redirect(url_for('main.index', user=current_user))
 

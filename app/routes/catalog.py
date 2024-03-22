@@ -12,6 +12,8 @@ catalog_bp = Blueprint('catalog', __name__)
 def catalog():
 
     # Разделитель +
+
+    # todo: цену влево подвинуть
     authors = request.args.get('author')
     publishers = request.args.get('publisher')
     genres = request.args.get('genre')

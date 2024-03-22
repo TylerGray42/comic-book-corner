@@ -1,6 +1,5 @@
-from flask import Blueprint
-from flask import render_template, redirect, url_for, flash
-from flask_login import current_user, logout_user, login_user
+from flask import Blueprint, render_template, redirect, url_for, flash
+from flask_login import current_user, logout_user, login_user, login_manager
 from flask_bcrypt import check_password_hash
 from sqlalchemy.exc import IntegrityError, SQLAlchemyError
 from app.forms import LoginForm, RegisterForm 

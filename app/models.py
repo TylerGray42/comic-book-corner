@@ -23,7 +23,8 @@ class Order(db.Model):
     __tablename__ = "order"
 
     id = db.Column(INTEGER(unsigned = True), primary_key=True)
-    time = db.Column(DATETIME, unique=False, nullable=False)
+    time = db.Column(DATETIME, unique=False, nullable=True)
+    order_completed = db.Column(BOOLEAN, unique=False, nullable=False, default=False)
     user_id = db.Column(INTEGER(unsigned = True), db.ForeignKey("user.id"), nullable=False)
 
     order_comic = db.relationship("Order_comic", backref="order", lazy=True, cascade='all, delete-orphan', passive_deletes=True)

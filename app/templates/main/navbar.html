@@ -3,7 +3,7 @@
         <nav class="navbar border-bottom border-body d-flex bg-dark align-items-center justify-content-center justify-content-lg-start"
             data-bs-theme="dark">
             <a href="/" class=" d-flex align-items-center mb-2 mb-lg-0 link-body-emphasis text-decoration-none">
-                <a class="navbar-brand me-lg-auto" href="{{ url_for('main.index') }}">Comic Book Corner</a>
+                <a class="navbar-brand me-lg-auto" href="{{ url_for('catalog.catalog') }}">Comic Book Corner</a>
             </a>
 
             <form class="d-flex col-12 col-lg-auto mb-lg-0 me-lg-3" role="search">
@@ -13,7 +13,7 @@
 
             <ul class="nav">
                 <li class="nav-item">
-                    <a href="#" class="nav-link link-body-emphasis px-2">Корзина</a>
+                    <a href="{{ url_for('user.cart', id=user.id) }}" class="nav-link link-body-emphasis px-2">Корзина</a>
                 </li>
                 <li class="nav-item dropdown">
                     <a class="nav-link link-body-emphasis dropdown-toggle" href="#" role="button"
@@ -25,7 +25,7 @@
                         {% if user.admin == 1 %}
                         <li><a class="dropdown-item" href="{{ url_for('admin.admin') }}">Админ</a></li>
                         {% else %}
-                        <li><a class="dropdown-item" href="{{ url_for('user.profile') }}">Профиль</a></li>
+                        <li><a class="dropdown-item" href="{{ url_for('user.profile', id=user.id) }}">Профиль</a></li>
                         {% endif %}
                         <li><a class="dropdown-item" href="{{ url_for('auth.logout') }}">Выход</a></li>
                         {% else %}

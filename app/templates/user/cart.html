@@ -1,0 +1,79 @@
+{% extends 'main/base.html' %}
+
+{% block content %}
+
+{% with messages=get_flashed_messages(with_categories=true) %}
+<br />
+{% for category, message in messages %}
+<div class='alert alert-{{category}} text-center alert-dismissible fade show m-auto'>
+    {{ message }}
+    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+</div>
+{% endfor %}
+{% endwith %}
+
+
+<div class="table-responsive">
+    <table class="table">
+        <thead>
+            <tr>
+                <th scope="col" class="h5">Корзина</th>
+                <th scope="col">Количество</th>
+                <th scope="col">Цена</th>
+                <th scope="col"></th>
+            </tr>
+        </thead>
+        {% for item in cart_list %}
+        <tbody>
+            <tr>
+                <th scope="row">
+                    <div class="d-flex align-items-center">
+                        <img src="/static/images/placeholder.jpeg" class="img-fluid rounded-3" style="width: 120px;"
+                            alt="Book">
+                        <div class="flex-column ms-4">
+                            <p class="mb-2">{{ item[0].title }}</p>
+                            <p class="mb-0">{{ item[1].fio }}</p>
+                        </div>
+                    </div>
+                </th>
+                <td class="align-middle">
+                    <div class="d-flex flex-row" style="width: 150px;">
+                        <button class="btn btn-link px-2 link-body-emphasis" onclick="">
+                            <span class="material-symbols-outlined">
+                                remove
+                            </span>
+                        </button>
+
+                        <input type="text" name="cart" value="{{ item[2].count }}" autocomplete="off"
+                            class="form-control form-control-sm">
+
+                        <button class="btn btn-link px-2 link-body-emphasis" onclick="">
+                            <span class="material-symbols-outlined">
+                                add
+                            </span>
+                        </button>
+                    </div>
+                </td>
+                <td class="align-middle">
+                    <p class="mb-0" style="font-weight: 500;">{{ item[0].price }} руб.</p>
+                </td>
+                <td class="align-middle">
+                    <button class="btn btn-link px-2 link-body-emphasis" onclick="">
+                        <span class="material-symbols-outlined">
+                            delete
+                        </span>
+                    </button>
+                </td>
+            </tr>
+        </tbody>
+        {% endfor %}
+        <tfoot>
+            <tr>
+                <td colspan="2" class="text-end">Итого</td>
+                <td colspan="2">600.00 руб</td>
+            </tr>
+        </tfoot>
+    </table>
+</div>
+
+{% endblock %}
