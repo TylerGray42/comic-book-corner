@@ -87,9 +87,17 @@
                         <h5 class="card-title">{{ comic[1] }}</h5>
                         <p class="card-text">{{ comic[2] }}</p>
                     </div>
-                    <div class="card-footer text-end">
-                        {{ comic[3] }} руб. 
-                        <a href="#" class="btn btn-primary">В корзину</a>
+                    <div class="card-footer">
+                        <div class="d-flex flex-column">
+                            <div class="p-2">{{ comic[3] }} руб.</div>
+                            {% if comic[4] %}
+                            <button class="btn btn-primary" data-comic-id="{{ comic[0] }}"
+                                onclick="add_to_cart(this)" disabled>В корзине</button>
+                            {% else %}
+                            <button class="btn btn-outline-primary" data-comic-id="{{ comic[0] }}"
+                                onclick="add_to_cart(this)">В корзину</button>
+                            {% endif %}
+                        </div>
                     </div>
                 </div>
             </div>
@@ -205,6 +213,37 @@
         });
     }
 
+    function add_to_cart(button) {
+
+        let comicId = button.getAttribute('data-comic-id');
+
+        fetch('/catalog/add_to_cart', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                comicId: comicId
+            })
+        })
+            .then(response => response.json())
+            .then(data => {
+                console.log(data);
+
+                if (data.message && data.message.category == 'error') {
+                    showNotification(data.message, data.category);
+                }
+
+                button.classList.remove('btn-outline-primary');
+                button.classList.add('btn-primary');
+                button.textContent = "В корзине"
+                button.disabled = true;
+
+            })
+            .catch(error => {
+                console.error('Ошибка на сервере:', error);
+            });
+    }
 
     document.addEventListener('DOMContentLoaded', function () {
 

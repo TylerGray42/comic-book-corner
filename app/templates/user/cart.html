@@ -2,15 +2,9 @@
 
 {% block content %}
 
-{% with messages=get_flashed_messages(with_categories=true) %}
 <br />
-{% for category, message in messages %}
-<div class='alert alert-{{category}} text-center alert-dismissible fade show m-auto'>
-    {{ message }}
-    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-</div>
-{% endfor %}
-{% endwith %}
+<div id="notification-container" class="m-auto"></div>
+<br />
 
 
 <div class="table-responsive">
@@ -20,7 +14,7 @@
                 <th scope="col" class="h5">Корзина</th>
                 <th scope="col">Количество</th>
                 <th scope="col">Цена</th>
-                <th scope="col"></th>
+                <th scope="col" style="white-space: nowrap; width: 1%;"></th>
             </tr>
         </thead>
         {% for item in cart_list %}
@@ -45,7 +39,7 @@
                         </button>
 
                         <input type="text" name="cart" value="{{ item[2].count }}" autocomplete="off"
-                            class="form-control form-control-sm">
+                            class="form-control form-control-sm" data-id="{{ item[2].id }}">
 
                         <button class="btn btn-link px-2 link-body-emphasis" onclick="updateInputValue(this, 1)">
                             <span class="material-symbols-outlined">
@@ -55,14 +49,39 @@
                     </div>
                 </td>
                 <td class="align-middle">
-                    <p class="mb-0" style="font-weight: 500;">{{ item[0].price }} руб.</p>
+                    <p class="mb-0" data-price="{{ item[0].price }}" style="font-weight: 500;">{{ item[0].price *
+                        item[2].count}} руб.</p>
                 </td>
-                <td class="align-middle">
-                    <button class="btn btn-link px-2 link-body-emphasis" onclick="">
+                <td class="align-middle" style="white-space: nowrap; width: 1%;">
+                    <button class="btn btn-link px-2 link-body-emphasis" data-bs-toggle="modal"
+                        data-bs-target="#confirmDeleteModal">
                         <span class="material-symbols-outlined">
                             delete
                         </span>
                     </button>
+
+                    <div class="modal fade" id="confirmDeleteModal" tabindex="-1"
+                        aria-labelledby="confirmDeleteModalLabel" aria-hidden="true">
+                        <div class="modal-dialog">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title" id="confirmDeleteModalLabel">Подтвердите удаление</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                        aria-label="Close"></button>
+                                </div>
+                                <div class="modal-body">
+                                    Вы уверены, что хотите удалить этот товар из корзины?
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary"
+                                        data-bs-dismiss="modal">Отмена</button>
+                                    <button type="button" class="btn btn-danger" data-id="{{ item[2].id }}"
+                                        data-bs-dismiss="modal" onclick="deleteRow(this)">Удалить</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
                 </td>
             </tr>
         </tbody>
@@ -70,7 +89,9 @@
         <tfoot>
             <tr>
                 <td colspan="2" class="text-end">Итого</td>
-                <td colspan="2">600.00 руб</td>
+                <td id="total-price">600.00 руб</td>
+                <td style="white-space: nowrap; width: 1%;"><button class="btn btn-primary" href="#"> Оформить заказ
+                    </button></td>
             </tr>
         </tfoot>
     </table>
@@ -78,14 +99,92 @@
 
 <script>
 
+    document.addEventListener("DOMContentLoaded", function () {
+        recalculateTotal();
+    });
+
     function updateInputValue(button, delta) {
-        const inputField = button.parentElement.querySelector('input');
+        const inputField = button.parentElement.querySelector('input[name="cart"]');
         let oldValue = parseFloat(inputField.value);
+        let orderId = inputField.getAttribute('data-id');
+        let priceElement = button.closest('tr').querySelector('p[data-price]');
+        let totalPrice = document.getElementById('total-price');
 
         if (oldValue + delta >= 0 && oldValue + delta <= 50) {
-            let newVal = oldValue + delta;
-            inputField.value = newVal;
+
+            fetch("/progile/{{user.id}}/cart/change_count", {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    orderId: orderId,
+                    newValue: oldValue + delta
+                })
+            })
+                .then(response => response.json())
+                .then(data => {
+                    console.log(data);
+
+                    if (data.message && data.message.category == 'error') {
+                        showNotification(data.message, data.category);
+                    }
+
+                    let newVal = oldValue + delta;
+                    inputField.value = newVal;
+                    priceElement.textContent = (parseFloat(priceElement.getAttribute('data-price')) * newVal).toFixed(2) + ' руб.';
+
+                    recalculateTotal();
+
+                })
+                .catch(error => {
+                    console.error('Ошибка на сервере:', error);
+                });
         }
+    }
+
+    function recalculateTotal() {
+        let total = 0;
+        let items = document.querySelectorAll('tbody tr');
+
+        items.forEach(function (item) {
+            let priceElement = item.querySelector('p[data-price]');
+            let price = parseFloat(priceElement.textContent);
+            total += price;
+        });
+
+        document.getElementById('total-price').textContent = total.toFixed(2) + ' руб.';
+    }
+
+    function deleteRow(button) {
+        let row = button.closest('tr');
+        let orderId = button.getAttribute('data-id');
+
+        fetch("/progile/{{ user.id }}/cart/delete_order", {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                orderId: orderId
+            })
+        })
+            .then(response => response.json())
+            .then(data => {
+                console.log(data);
+
+                if (data.message && data.message.category == 'error') {
+                    showNotification(data.message, data.category);
+                }
+
+                row.remove();
+
+                recalculateTotal();
+
+            })
+            .catch(error => {
+                console.error('Ошибка на сервере:', error);
+            });
     }
 
 </script>

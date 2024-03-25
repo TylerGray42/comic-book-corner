@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, redirect, url_for
+from flask import Blueprint, render_template, redirect, url_for, request, jsonify
 from flask_login import current_user
 from sqlalchemy.orm import joinedload
 from app.models import Order, Order_comic, Comic, Author
@@ -29,6 +29,49 @@ def cart(id):
                   db.session.query(Order_comic).filter(Order_comic.order_id == order.id, Order_comic.comic_id == comic.id).first()
                   ) for comic in comics)
 
-    # cart_list = comics
+
 
     return render_template('user/cart.html', user=current_user, cart_list=cart_list)
+
+
+@user_bp.route("/progile/<id>/cart/change_count", methods=["POST"])
+def change_coutn(id):
+    if not current_user.is_authenticated:
+        return redirect(url_for('auth.login'))
+    
+
+    try:
+        data = request.get_json()
+
+        order_comic_id = data.get('orderId')
+        newValue = data.get('newValue')
+
+        db.session.query(Order_comic).filter(Order_comic.id == order_comic_id).first().count = newValue
+        db.session.commit()
+
+        return jsonify({'category': 'success', 'message': 'Количество товара изменено'})
+    
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'error': str(e)}) 
+    
+
+@user_bp.route("/progile/<id>/cart/delete_order", methods=["DELETE"])
+def delete_order(id):
+    if not current_user.is_authenticated:
+        return redirect(url_for('auth.login'))
+    
+
+    try:
+        data = request.get_json()
+
+        order_comic = db.session.query(Order_comic).filter(Order_comic.id == data.get('orderId')).first()
+        db.session.delete(order_comic)
+        db.session.commit()
+
+        return jsonify({'category': 'success', 'message': 'Товар удален из корзины'})
+    
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'error': str(e)}) 
+    
