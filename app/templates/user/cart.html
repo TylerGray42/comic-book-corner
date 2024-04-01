@@ -39,7 +39,8 @@
                         </button>
 
                         <input type="text" name="cart" value="{{ item[2].count }}" autocomplete="off"
-                            class="form-control form-control-sm" data-id="{{ item[2].id }}">
+                            class="form-control form-control-sm" data-id="{{ item[2].id }}"
+                            onchange="updateInput(this)">
 
                         <button class="btn btn-link px-2 link-body-emphasis" onclick="updateInputValue(this, 1)">
                             <span class="material-symbols-outlined">
@@ -103,6 +104,43 @@
         recalculateTotal();
     });
 
+    function updateInput(input) {
+        let priceElement = input.closest('tr').querySelector('p[data-price]');
+        let value = parseInt(input.value);
+        if (!value || value < 0 || value > 50) {
+            input.value = 0;
+        } else {
+            input.value = value
+        }
+
+        fetch("/profile/{{user.id}}/cart/change_count", {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                orderId: input.getAttribute('data-id'),
+                newValue: parseInt(input.value)
+            })
+        })
+            .then(response => response.json())
+            .then(data => {
+                console.log(data);
+
+                if (data.message && data.message.category == 'error') {
+                    showNotification(data.message, data.category);
+                }
+
+                priceElement.textContent = (parseFloat(priceElement.getAttribute('data-price')) * parseInt(input.value)).toFixed(2) + ' руб.';
+
+                recalculateTotal();
+
+            })
+            .catch(error => {
+                console.error('Ошибка на сервере:', error);
+            });
+    }
+
     function updateInputValue(button, delta) {
         const inputField = button.parentElement.querySelector('input[name="cart"]');
         let oldValue = parseFloat(inputField.value);
@@ -112,7 +150,7 @@
 
         if (oldValue + delta >= 0 && oldValue + delta <= 50) {
 
-            fetch("/progile/{{user.id}}/cart/change_count", {
+            fetch("/profile/{{user.id}}/cart/change_count", {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -160,7 +198,7 @@
         let row = button.closest('tr');
         let orderId = button.getAttribute('data-id');
 
-        fetch("/progile/{{ user.id }}/cart/delete_order", {
+        fetch("/profile/{{ user.id }}/cart/delete_order", {
             method: 'DELETE',
             headers: {
                 'Content-Type': 'application/json'

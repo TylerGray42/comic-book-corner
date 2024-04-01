@@ -23,6 +23,14 @@ def cart(id):
 # Отслеживать change на input 
     
     order = db.session.query(Order).filter(Order.user_id == current_user.id, Order.order_completed == 0).first()
+    if not order:
+        order = Order(
+            time = None,
+            order_completed = False,
+            user_id = current_user.id,
+        )
+        db.session.add(order)
+        db.session.commit()
     comics = db.session.query(Comic).join(Order_comic).filter(Order_comic.order_id == order.id).options(joinedload(Comic.order_comic)).all()
     cart_list = ((comic,
                   db.session.query(Author).filter(Author.id == comic.author_id).first(),
@@ -34,8 +42,8 @@ def cart(id):
     return render_template('user/cart.html', user=current_user, cart_list=cart_list)
 
 
-@user_bp.route("/progile/<id>/cart/change_count", methods=["POST"])
-def change_coutn(id):
+@user_bp.route("/profile/<id>/cart/change_count", methods=["POST"])
+def change_count(id):
     if not current_user.is_authenticated:
         return redirect(url_for('auth.login'))
     
@@ -56,7 +64,7 @@ def change_coutn(id):
         return jsonify({'error': str(e)}) 
     
 
-@user_bp.route("/progile/<id>/cart/delete_order", methods=["DELETE"])
+@user_bp.route("/profile/<id>/cart/delete_order", methods=["DELETE"])
 def delete_order(id):
     if not current_user.is_authenticated:
         return redirect(url_for('auth.login'))

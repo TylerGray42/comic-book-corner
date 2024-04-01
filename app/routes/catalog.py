@@ -23,7 +23,8 @@ def catalog():
 
     comics = Comic.query.slice(8*(int(page_number)-1), 8*(int(page_number))).all()
     order = db.session.query(Order).filter(Order.user_id == current_user.id, Order.order_completed == 0).first()
-    user_order = db.session.query(Comic).join(Order_comic).filter(Order_comic.order_id == order.id).options(joinedload(Comic.order_comic)).all()
+    if order:
+        user_order = db.session.query(Comic).join(Order_comic).filter(Order_comic.order_id == order.id).options(joinedload(Comic.order_comic)).all()
 
     author_list = ((item.id, item.fio) for item in Author.query.all())
     publisher_list = ((item.id, item.title) for item in Publisher.query.all())
@@ -33,7 +34,7 @@ def catalog():
                    item.title, 
                    item.description[:125] + "..." if len(item.description) > 125 else item.description,
                    item.price,
-                   item in user_order) for item in comics)
+                   item in user_order if order else False) for item in comics)
 
 
     return render_template('catalog/catalog.html',
@@ -54,6 +55,15 @@ def add_to_cart():
 
         comic_id = data.get("comicId")
         order = db.session.query(Order).filter(Order.user_id == current_user.id, Order.order_completed == 0).first()
+
+        if not order:
+            order = Order(
+                time = None,
+                order_completed = False,
+                user_id = current_user.id,
+            )
+            db.session.add(order)
+            db.session.commit()
 
         new_order_comic = Order_comic(
             count = 1,
