@@ -18,7 +18,7 @@ def login():
             user = User.query.filter_by(login=form.user_login.data).first()
             if check_password_hash(user.password, form.user_password.data):
                 login_user(user)
-                return redirect(url_for('main.index'))
+                return redirect(url_for('catalog.catalog'))
             else:
                 flash("Ошибка логина или пароля!", "danger")
         

@@ -6,14 +6,17 @@
                 <a class="navbar-brand me-lg-auto" href="{{ url_for('catalog.catalog') }}">Comic Book Corner</a>
             </a>
 
-            <form class="d-flex col-12 col-lg-auto mb-lg-0 me-lg-3" role="search">
-                <input class="form-control me-2" type="search" placeholder="Поиск..." aria-label="Search">
-                <button class="btn btn-outline-secondary" type="submit">Поиск</button>
-            </form>
+            <div class="d-flex col-12 col-lg-auto mb-lg-0 me-lg-3">
+                <input id="globalSearch" value="{{ search_value if search_value else ''}}" class="form-control me-2"
+                    placeholder="Поиск..." aria-label="Search">
+                <button class="btn btn-outline-secondary" type="button" onclick="search_comic_value()">Поиск</button>
+            </div>
+
 
             <ul class="nav">
                 <li class="nav-item">
-                    <a href="{{ url_for('user.cart', id=user.id) }}" class="nav-link link-body-emphasis px-2">Корзина</a>
+                    <a href="{{ url_for('user.cart', id=user.id) }}"
+                        class="nav-link link-body-emphasis px-2">Корзина</a>
                 </li>
                 <li class="nav-item dropdown">
                     <a class="nav-link link-body-emphasis dropdown-toggle" href="#" role="button"
@@ -38,3 +41,34 @@
         </nav>
     </div>
 </header>
+
+<script>
+
+    document.addEventListener("DOMContentLoaded", function () {
+        var globalSearch = document.getElementById("globalSearch");
+        globalSearch.addEventListener("keydown", function (e) {
+            if (e.code === "Enter") {
+                search_comic_value();
+            }
+        });
+    })
+
+    function search_comic_value() {
+        var globalSearch = document.getElementById("globalSearch");
+        var url = window.location.href;
+        if (globalSearch.value === '') {
+            if (url.indexOf('search_value=') !== -1) {
+                var new_url = url.replace(/([?&])search_value=[^&#]+/, '');
+                window.location.href = new_url;
+            }
+        } else {
+            if (url.indexOf('search_value=') !== -1) {
+                var new_url = url.replace(/(search_value=)[^&#]+/, '$1' + globalSearch.value);
+                window.location.href = new_url;
+            } else {
+                var separator = url.indexOf('?') !== -1 ? '&' : '?';
+                window.location.href = url + separator + 'search_value=' + globalSearch.value;
+            }
+        }
+    }
+</script>

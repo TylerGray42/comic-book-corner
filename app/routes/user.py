@@ -19,9 +19,7 @@ def profile(id):
 def cart(id):
     if not current_user.is_authenticated:
         return redirect(url_for('auth.login'))
-    
-# Отслеживать change на input 
-    
+        
     order = db.session.query(Order).filter(Order.user_id == current_user.id, Order.order_completed == 0).first()
     if not order:
         order = Order(
@@ -36,7 +34,6 @@ def cart(id):
                   db.session.query(Author).filter(Author.id == comic.author_id).first(),
                   db.session.query(Order_comic).filter(Order_comic.order_id == order.id, Order_comic.comic_id == comic.id).first()
                   ) for comic in comics)
-
 
 
     return render_template('user/cart.html', user=current_user, cart_list=cart_list)

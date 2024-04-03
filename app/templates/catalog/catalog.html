@@ -107,17 +107,15 @@
             <nav aria-label="page-navigation">
                 <ul class="pagination justify-content-end">
                     <li class="page-item">
-                        <a class="page-link">В начало</a>
+                        <button class="page-link" data-page="0" onclick="change_page(this)">В начало</button>
                     </li>
-                    <li class="page-item"><button class="page-link" data-page="1" onclick="change_page(1)">1</button>
+                    {% for page in range(1, pages+1) %}
+                    <li class="page-item"><button class="page-link" data-page="{{ page }}" onclick="change_page(this)">{{ page }}</button>
                     </li>
-                    <li class="page-item"><button class="page-link" data-page="2" onclick="change_page(2)">2</button>
-                    </li>
-                    <li class="page-item"><button class="page-link" data-page="3" onclick="change_page(3)">3</button>
-                    </li>
-                    <li class="page-item"><button class="page-link">...</button></li>
+                    {% endfor %}
+                    <!-- <li class="page-item"><button class="page-link">...</button></li> -->
                     <li class="page-item">
-                        <a class="page-link" href="#">В конец</a>
+                        <button class="page-link" data-page="{{ pages }}" onclick="change_page(this)">В конец</button>
                     </li>
                 </ul>
             </nav>
@@ -148,7 +146,11 @@
         window.location.href = url;
     }
 
-    function change_page(page_number) {
+    function change_page(page_button) {
+
+        let page_number = page_button.getAttribute('data-page')
+
+        if (page_number == 0) page_number = 1;
 
         var url = window.location.href;
 

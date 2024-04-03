@@ -1,7 +1,9 @@
+from math import ceil
 from flask import Blueprint, render_template, request, jsonify, redirect, url_for
 from flask_login import current_user
+from sqlalchemy import union
 from sqlalchemy.orm import joinedload
-from app.models import Genre, Publisher, Author, Comic, Order_comic, Order
+from app.models import Genre, Genre_comic, Publisher, Author, Comic, Order_comic, Order
 from app.extensions import db
 
 
@@ -18,13 +20,28 @@ def catalog():
     publishers = request.args.get('publisher')
     genres = request.args.get('genre')
     page_number = request.args.get('page')
+    search_value = request.args.get('search_value')
+
+    comic_on_page = 8
+
     if not page_number:
         page_number = 1
 
-    comics = Comic.query.slice(8*(int(page_number)-1), 8*(int(page_number))).all()
+    comic_filter_1 = db.session.query(Comic).join(Genre_comic).filter(Genre_comic.genre_id.in_(list(map(int, genres.split("+")))), 
+                                                                      Genre_comic.comic_id == Comic.id).subquery() if genres else db.session.query(Comic).subquery()
+        
+    comic_filter_2 = db.session.query(comic_filter_1).filter(comic_filter_1.c.author_id.in_(list(map(int, authors.split("+")))) if authors else True,
+                                                  comic_filter_1.c.publisher_id.in_(list(map(int, publishers.split("+")))) if publishers else True).distinct().subquery()
+    
+    comics = db.session.query(comic_filter_2).filter(comic_filter_2.c.title.contains(search_value if search_value else ""))
+
+    pages = ceil(len(comics.all()) / comic_on_page)
+
+    comics = comics.slice(comic_on_page*(int(page_number)-1), comic_on_page*(int(page_number))).all()
+
     order = db.session.query(Order).filter(Order.user_id == current_user.id, Order.order_completed == 0).first()
     if order:
-        user_order = db.session.query(Comic).join(Order_comic).filter(Order_comic.order_id == order.id).options(joinedload(Comic.order_comic)).all()
+        user_order = [i.id for i in db.session.query(Comic).join(Order_comic).filter(Order_comic.order_id == order.id).options(joinedload(Comic.order_comic)).all()]
 
     author_list = ((item.id, item.fio) for item in Author.query.all())
     publisher_list = ((item.id, item.title) for item in Publisher.query.all())
@@ -34,7 +51,7 @@ def catalog():
                    item.title, 
                    item.description[:125] + "..." if len(item.description) > 125 else item.description,
                    item.price,
-                   item in user_order if order else False) for item in comics)
+                   item.id in user_order if order else False) for item in comics)
 
 
     return render_template('catalog/catalog.html',
@@ -42,7 +59,9 @@ def catalog():
                            author_list=author_list,
                            publisher_list=publisher_list,
                            genre_list=genre_list,
-                           comic_list=comic_list)
+                           comic_list=comic_list, 
+                           search_value = search_value,
+                           pages=pages)
 
 
 @catalog_bp.route("/catalog/add_to_cart", methods=["POST"])
