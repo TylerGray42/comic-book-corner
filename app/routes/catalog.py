@@ -39,7 +39,7 @@ def catalog():
 
     comics = comics.slice(comic_on_page*(int(page_number)-1), comic_on_page*(int(page_number))).all()
 
-    order = db.session.query(Order).filter(Order.user_id == current_user.id, Order.order_completed == 0).first()
+    order = db.session.query(Order).filter(Order.user_id == current_user.id, Order.order_completed == 0).first() if current_user.is_authenticated else None
     if order:
         user_order = [i.id for i in db.session.query(Comic).join(Order_comic).filter(Order_comic.order_id == order.id).options(joinedload(Comic.order_comic)).all()]
 

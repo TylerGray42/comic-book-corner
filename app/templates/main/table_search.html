@@ -85,7 +85,7 @@
 
             rows.forEach(function (row) {
                 var text = row.textContent.toLowerCase();
-                row.style.display = text.includes(value) ? "block" : "none";
+                row.style.display = text.includes(value) ? "table-row" : "none";
             });
         });
 
